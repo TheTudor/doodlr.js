@@ -6,7 +6,7 @@
 
 // -- Canvas ------------------------------------------------------- //
 var canvas, 
-    ctx, 
+    ctx,
     draw_flag = false,
     previousX = 0,
     currentX = 0,
@@ -44,7 +44,7 @@ function draw_dot() {
   ctx.beginPath();
 
   ctx.fillStyle = color;
-  ctx.fillRect(currentX, currentY, 2, 2);
+  ctx.fillRect(currentX, currentY, size, size);
 
   ctx.closePath();
 }
@@ -96,36 +96,17 @@ function get_coordinates(action, e) {
 }
 
 // -- Pixel -------------------------------------------------------- //
-
-// The pixel array the image is saved in. Each pixel takes up 4 fields in the array for R, G, B, Alpha
-var pixelArray = ctx.createImageData(w, h);
-
-// Set pixel on canvas, given the position in the array (X + Y * width) and R, G, B, Alpha
-function setPixel(index, r, g, b, a) {
-  // update pixel array
-  index *= 4;
-  pixelArray[index]     = r;
-  pixelArray[index + 1] = g;
-  pixelArray[index + 2] = b;
-  pixelArray[index + 3] = a;
-  // update canvas
-  ctx.putImageData(pixelArray, index / w, index % w);
-}
-
-// Get pixel from canvas, returns 4-element array with R, G, B, Alpha
-function getPixel(x, y) {
-  var pixel = ctx.getImageGata(x, y, w, h);
-  return pixel.data;
-}
+// The getImageData() method returns the pixel data array for a specified rectangle on a canvas
+// to get a specific pixel, array[index].data, where index = X + Y * width
 
 // Loads image given a pixel array
-function loadImage(array) {
+function loadImage(ctx, array) {
   ctx.putImageData(array, 0, 0);
 }
 
 // Returns pixel array 
-
-function getImage() {
-  return ctx.createImageData(w, h);
+function getImage(ctx) {
+  return ctx.getImageData(w, h);
 }
+
 
