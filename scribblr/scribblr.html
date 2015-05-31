@@ -1,0 +1,19 @@
+<head>
+  <title>Scribblr</title>
+</head>
+
+<body>
+  <div class="wall">
+    {{#each rows}}
+      <div class="row">
+      {{#each blocks}}
+        {{> block}}
+      {{/each}}
+      </div>
+    {{/each}}
+  </div>
+</body>
+
+<template name="block">
+  <canvas class="block"></canvas>
+</template>
