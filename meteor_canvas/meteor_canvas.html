@@ -1,0 +1,18 @@
+<head>
+  <script type="text/javascript" src="jscolor/jscolor.js"></script>
+  <script type="text/javascript" src="base/canvas.js"></script>
+  <link rel="text/css" src="base/canvas.css">
+</head>
+
+<body>
+  {{> Canvas}}
+</body>
+
+<!-- meteor template for canvas -->
+<template name="Canvas">
+  <!-- color picker -->
+  <input class="color" value="000" onchange="pick_color(this)">
+  <br/>
+  <!-- canvas --> 
+  <canvas id="canvas" class="block" width="800" height="600" style="border: 1px solid"></canvas>
+</template>
