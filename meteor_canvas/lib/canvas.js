@@ -1,20 +1,13 @@
 drawStream = new Meteor.Stream('draw');
 
+// documentation http://docs.meteor.com/#/basic/Template-onRendered
+
+
 if (Meteor.isClient) {
 
-  // -- Canvas ------------------------------------------------------- //
+  // TODO: remove global variables
   var canvas, ctx, w, h;
 
-  $(document).ready(function() {    
-    canvas = $('#canvas');
-    console.log(canvas.id);
-    ctx = canvas[0].getContext('2d');
-    w = canvas.width;
-    h = canvas.height;
-    ctx.fillRect(0, 0, w, h);
-  });
-
-  //var canvas = document.getElementById("canvas");
   var draw_flag = false,
     previousX = 0,
     currentX = 0,
@@ -26,7 +19,18 @@ if (Meteor.isClient) {
     size = 2;
 
 
-  // -- Events ------------------------------------------------------- //
+  // Canvas 
+  Template.canvas.onRendered(function () {
+    canvas = this.find('canvas').value;
+    console.log(canvas.id); // HERE IS WHERE IT FAILS
+    ctx = canvas[0].getContext('2d');
+    w = canvas.width;
+    h = canvas.height;
+    ctx.fillRect(0, 0, w, h);
+  });
+
+
+  // Events 
   Template.canvas.events({
       'mousedown': function(e) {
         get_coordinates('down', e);
@@ -43,8 +47,8 @@ if (Meteor.isClient) {
     });
 
 
-  // TODO new picker
   // -- Draw --------------------------------------------------------- //
+  // TODO new picker
   // Get color from jscolor color picker
   function pick_color(obj) {
     color = '#' + obj.color;
