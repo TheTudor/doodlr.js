@@ -1,42 +1,49 @@
-if (!Meteor.isClient) return;
+drawStream = new Meteor.Stream('draw');
 
-this.Canvas = function Canvas(id) {
+if (Meteor.isClient) {
+
   // -- Canvas ------------------------------------------------------- //
-  var canvas = document.getElementById('canvas');
-  ctx = canvas.getContext("2d");
-  w = canvas.width;
-  h = canvas.height;
-  draw_flag = false,
+  var canvas, ctx, w, h;
+
+  $(document).ready(function() {    
+    canvas = $('#canvas');
+    console.log(canvas.id);
+    ctx = canvas[0].getContext('2d');
+    w = canvas.width;
+    h = canvas.height;
+    ctx.fillRect(0, 0, w, h);
+  });
+
+  //var canvas = document.getElementById("canvas");
+  var draw_flag = false,
     previousX = 0,
     currentX = 0,
     previousY = 0,
     currentY = 0;
 
   // Drawing parameters
-  var color = "#000",
+  var color = "#000000",
     size = 2;
 
-  // canvas.addEventListener("mousemove", function (e) { get_coordinates('move', e) }, false);
-  // canvas.addEventListener("mousedown", function (e) { get_coordinates('down', e) }, false);
-  // canvas.addEventListener("mouseup",   function (e) { get_coordinates('up'  , e) }, false);
-  // canvas.addEventListener("mouseout",  function (e) { get_coordinates('out' , e) }, false);
 
-  Template.Canvas.events({
-    'mousedown': function(e) {
-      get_coordinates('down', e);
-    },
-    'mouseup': function(e) {
-      get_coordinates('up', e);
-    },
-    'mousemove': function(e) {
-      get_coordinates('move', e);
-    },
-    'mouseout': function(e) {
-      get_coordinates('out', e);
-    }
-  });
+  // -- Events ------------------------------------------------------- //
+  Template.canvas.events({
+      'mousedown': function(e) {
+        get_coordinates('down', e);
+      },
+      'mouseup': function(e) {
+        get_coordinates('up', e);
+      },
+      'mousemove': function(e) {
+        get_coordinates('move', e);
+      },
+      'mouseout': function(e) {
+        get_coordinates('out', e);
+      }
+    });
 
 
+  // TODO new picker
   // -- Draw --------------------------------------------------------- //
   // Get color from jscolor color picker
   function pick_color(obj) {
@@ -100,9 +107,9 @@ this.Canvas = function Canvas(id) {
     }
   }
 
-  ctx.fillRect(0, 0, canvas.width(), canvas.height());
 
 }
+
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
