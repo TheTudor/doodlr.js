@@ -21,11 +21,11 @@ if (Meteor.isClient) {
 
   // Canvas 
   Template.canvas.onRendered(function () {
-    canvas = this.find('canvas').value;
-    console.log(canvas.id); // HERE IS WHERE IT FAILS
-    ctx = canvas[0].getContext('2d');
+    canvas = this.find('#canvas');
+    ctx = canvas.getContext('2d');
     w = canvas.width;
     h = canvas.height;
+    ctx.fillStyle = '#00ff00';
     ctx.fillRect(0, 0, w, h);
   });
 
