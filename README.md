@@ -1,7 +1,11 @@
 To run:
+  $ cd canvas
+  $ meteor
 
-$ cd meteor
+Home at http://localhost:3000
+Canvas at http://localhost:3000/canvas
 
-$ meteor
-
-View at http://localhost:3000
+Dependencies:
+  iron:router 
+  streams
+  timmyg13:parse-sdk
