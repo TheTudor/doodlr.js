@@ -1,0 +1,43 @@
+{
+  "builtBy": "meteor/16",
+  "unibuildDependencies": {
+    "os.json": {
+      "files": {
+        "/Users/ms/WebApp/webapp-g1427122/canvas/packages/streams/package.js": "7c8dec93f73e67ac122ddadcc99089357e7bd796",
+        "/Users/ms/WebApp/webapp-g1427122/canvas/packages/streams/lib/ev.js": "cbad1482ed78a20d7310e6278da3bb206b6a335f",
+        "/Users/ms/WebApp/webapp-g1427122/canvas/packages/streams/lib/server.js": "b5e4ae6625c3c6781bafb492c780440852986d13",
+        "/Users/ms/WebApp/webapp-g1427122/canvas/packages/streams/lib/stream_permission.js": "8ec7acee25ffd831cf028fb966e82049537c7aeb"
+      },
+      "directories": []
+    },
+    "web.browser.json": {
+      "files": {
+        "/Users/ms/WebApp/webapp-g1427122/canvas/packages/streams/package.js": "7c8dec93f73e67ac122ddadcc99089357e7bd796",
+        "/Users/ms/WebApp/webapp-g1427122/canvas/packages/streams/lib/ev.js": "cbad1482ed78a20d7310e6278da3bb206b6a335f",
+        "/Users/ms/WebApp/webapp-g1427122/canvas/packages/streams/lib/client.js": "79c955151e0a16b7dd3ac67c7c5120cc3fdcef8c"
+      },
+      "directories": []
+    }
+  },
+  "pluginDependencies": {
+    "files": {
+      "/Users/ms/WebApp/webapp-g1427122/canvas/packages/streams/package.js": "7c8dec93f73e67ac122ddadcc99089357e7bd796"
+    },
+    "directories": []
+  },
+  "pluginProviderPackageMap": {
+    "streams": {
+      "kind": "local",
+      "sourceRoot": "/Users/ms/WebApp/webapp-g1427122/canvas/packages/streams"
+    },
+    "meteor": {
+      "kind": "versioned",
+      "version": "1.1.6"
+    },
+    "underscore": {
+      "kind": "versioned",
+      "version": "1.0.3"
+    }
+  },
+  "includeCordovaUnibuild": false
+}
