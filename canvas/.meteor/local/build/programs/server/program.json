@@ -262,6 +262,11 @@
       }
     },
     {
+      "sourceMap": "packages/timmyg13_parse-sdk.js.map",
+      "sourceMapRoot": "packages",
+      "path": "packages/timmyg13_parse-sdk.js"
+    },
+    {
       "sourceMap": "packages/session.js.map",
       "sourceMapRoot": "packages",
       "path": "packages/session.js"
@@ -276,6 +281,9 @@
     },
     {
       "path": "app/lib/canvas.js"
+    },
+    {
+      "path": "app/lib/wall.js"
     }
   ]
 }
