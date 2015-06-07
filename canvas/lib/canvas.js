@@ -1,7 +1,4 @@
-drawStream = new Meteor.Stream('draw');
-
 // documentation http://docs.meteor.com/#/basic/Template-onRendered
-
 
 if (Meteor.isClient) {
 

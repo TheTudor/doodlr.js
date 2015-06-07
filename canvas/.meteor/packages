@@ -7,6 +7,5 @@
 meteor-platform
 insecure
 jquery
-streams
 iron:router
 timmyg13:parse-sdk
