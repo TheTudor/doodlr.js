@@ -27,7 +27,7 @@ if (Meteor.isClient) {
     ctx = canvas.getContext('2d');
     w = canvas.width;
     h = canvas.height;
-    ctx.fillStyle = '#00ff00';
+    ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, w, h);
     loadImage(ctx);
   });
@@ -75,20 +75,29 @@ if (Meteor.isClient) {
 
     query.first({
       success: function(brick) {
-        var image = new Image();
-        image.setAttribute('crossOrigin', 'anonymous');
-        image.onload = function() {
-          ctx.drawImage(image, 0, 0);
-        };
-        image.src =  brick.get("image")._url;
+        if(brick != undefined) {
+          var image = new Image();
+          image.setAttribute('crossOrigin', 'anonymous');
+          image.onload = function() {
+            ctx.drawImage(image, 0, 0);
+          };
+          image.src =  brick.get("image")._url;
+        }
       },
       error: function(error) {
+        // It's just a clean canvas!
       }
     });
   }
 
   // Save Image to Parse
   function saveImage(action, e, row, col) {
+    // First get the image
+    var imageData = canvas.toDataURL();
+    var imageBase64 = imageData.replace(/^data:image\/(png|jpg);base64,/, ""); //magic, do not touch
+    var image = new Parse.File("drawing.png", {base64: imageBase64});
+
+    // try to query for a brick
     var brick = Parse.Object.extend("Brick");
     var query = new Parse.Query(brick);
     query.equalTo("row", row);
@@ -97,39 +106,33 @@ if (Meteor.isClient) {
 
     query.first({
       success: function(brick) {
-        var imageData = canvas.toDataURL();
-        var imageBase64 = imageData.replace(/^data:image\/(png|jpg);base64,/, ""); //magic, do not touch
-        var image = new Parse.File("drawing.png", {base64: imageBase64});
+        // finds a brick, thus updates the current one
+        if(brick != undefined) {
+          brick.set("image", image);
 
-        brick.set("image", image);
-
-        brick.save().then(function() {
-          console.log("Successfuly saved to parse");
-        }, function(error) {
-          alert("Error saving to parse");
-        });
+          brick.save().then(function() {
+            console.log("Successfuly saved brick (" + row + ", " + col + ") to Parse");
+          }, function(error) {
+            console.log("Error saving to Parse");
+          });
+        }
+        // it's a new drawing! create a brick
+        else {
+          var newBrick = new Parse.Object("Brick");
+          newBrick.set("row", row);
+          newBrick.set("column", col);
+          newBrick.set("image", image);
+          newBrick.save().then(function() {
+            console.log("Successfuly saved brick (" + row + ", " + col + ") to Parse");
+          }, function(error) {
+            alert("Error saving to parse");
+          });
+        }
       },
       error: function(error) {
+        console.log("Parse retrieval error");
       }
     });
-  }
-
-  // Get Brick by row and column
-  function findBrick(row, col) {
-    var brick = Parse.Object.extend("Brick");
-    var query = new Parse.Query(brick);
-    query.equalTo("row", row);
-    query.equalTo("column", col);
-
-    query.first({
-      success: function(brick) {
-        return brick;
-      },
-      error: function(error) {
-        return null;
-      }
-    });
-
   }
 
  

@@ -7,15 +7,15 @@
     {{#each rows}}
       <div class="row">
       {{#each blocks}}
-        {{> block}}
+        {{> Block}}
       {{/each}}
       </div>
     {{/each}}
   </div>
 </template>
 
-<template name="block">
-  <canvas id="block_" class="block"></canvas>
+<template name="Block">
+  <canvas id="{{block_id}}" class="block"></canvas>
 </template>
 
 <template name="registerForm">
