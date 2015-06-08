@@ -1,3 +1,5 @@
+Parse.initialize("9QOijSH3c8VZ4OMuXSNtcyZ9DOlNCttX9iMsv1GL", "mbIy8g11RvZG6c2hoZ9IHumiEGszjWyACcaOcsHg");
+
 // documentation http://docs.meteor.com/#/basic/Template-onRendered
 
 if (Meteor.isClient) {
@@ -40,6 +42,9 @@ if (Meteor.isClient) {
       },
       'mouseout': function(e) {
         get_coordinates('out', e);
+      },
+      'click .my-button': function(e) {
+        saveImage('click', e);
       }
     });
 
@@ -108,6 +113,22 @@ if (Meteor.isClient) {
     }
   }
 
+  // Save Image to Parse
+  function saveImage(action, e) {
+    var imageData = canvas.toDataURL();
+    var imageBase64 = imageData.replace(/^data:image\/(png|jpg);base64,/, ""); //magic, do not touch
+    var image = new Parse.File("drawing.png", {base64: imageBase64});
+    image.save().then(function() {
+      console.log("Successfuly saved to parse");
+    }, function(error) {
+      alert("Error saving to parse")
+    });
+    var brick = new Parse.Object("Brick");
+    brick.set("Row", 2);
+    brick.set("Column", 2);
+    brick.set("Image", image);
+    brick.save();
+  }
 
 }
 
