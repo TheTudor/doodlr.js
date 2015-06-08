@@ -18,6 +18,9 @@ if (Meteor.isClient) {
     size = 2;
 
 
+  // Canvas parameters
+  var row, col;
+
   // Canvas 
   Template.canvas.onRendered(function () {
     canvas = this.find('#canvas');
@@ -26,11 +29,13 @@ if (Meteor.isClient) {
     h = canvas.height;
     ctx.fillStyle = '#00ff00';
     ctx.fillRect(0, 0, w, h);
+    loadImage(ctx);
   });
 
 
   // Events 
   Template.canvas.events({
+      // Mouse events for drawing
       'mousedown': function(e) {
         get_coordinates('down', e);
       },
@@ -43,12 +48,91 @@ if (Meteor.isClient) {
       'mouseout': function(e) {
         get_coordinates('out', e);
       },
-      'click .my-button': function(e) {
-        saveImage('click', e);
+
+      // Event to save canvas content
+      'click .save-button': function(e) {
+        saveImage('click', e, row, col);
       }
     });
 
 
+  // -- Database ----------------------------------------------------- //
+  // Load Image from Parse
+  function loadImage(ctx) {
+    var url = window.location.href;
+    var rowIndex = url.indexOf("x") + 1;
+    var colIndex = url.indexOf("y") + 1;
+    
+    // TODO: remove global
+    row = +url.slice(rowIndex, colIndex - 1);
+    col = +url.slice(colIndex, url.length);
+    console.log("Loading brick at location " + row + ", " + col);
+  
+    var brick = Parse.Object.extend("Brick");
+    var query = new Parse.Query(brick);
+    query.equalTo("row", row);
+    query.equalTo("column", col);
+
+    query.first({
+      success: function(brick) {
+        var image = new Image();
+        image.setAttribute('crossOrigin', 'anonymous');
+        image.onload = function() {
+          ctx.drawImage(image, 0, 0);
+        };
+        image.src =  brick.get("image")._url;
+      },
+      error: function(error) {
+      }
+    });
+  }
+
+  // Save Image to Parse
+  function saveImage(action, e, row, col) {
+    var brick = Parse.Object.extend("Brick");
+    var query = new Parse.Query(brick);
+    query.equalTo("row", row);
+    query.equalTo("column", col);
+
+
+    query.first({
+      success: function(brick) {
+        var imageData = canvas.toDataURL();
+        var imageBase64 = imageData.replace(/^data:image\/(png|jpg);base64,/, ""); //magic, do not touch
+        var image = new Parse.File("drawing.png", {base64: imageBase64});
+
+        brick.set("image", image);
+
+        brick.save().then(function() {
+          console.log("Successfuly saved to parse");
+        }, function(error) {
+          alert("Error saving to parse");
+        });
+      },
+      error: function(error) {
+      }
+    });
+  }
+
+  // Get Brick by row and column
+  function findBrick(row, col) {
+    var brick = Parse.Object.extend("Brick");
+    var query = new Parse.Query(brick);
+    query.equalTo("row", row);
+    query.equalTo("column", col);
+
+    query.first({
+      success: function(brick) {
+        return brick;
+      },
+      error: function(error) {
+        return null;
+      }
+    });
+
+  }
+
+ 
   // -- Draw --------------------------------------------------------- //
   // TODO new picker
   // Get color from jscolor color picker
@@ -113,22 +197,6 @@ if (Meteor.isClient) {
     }
   }
 
-  // Save Image to Parse
-  function saveImage(action, e) {
-    var imageData = canvas.toDataURL();
-    var imageBase64 = imageData.replace(/^data:image\/(png|jpg);base64,/, ""); //magic, do not touch
-    var image = new Parse.File("drawing.png", {base64: imageBase64});
-    image.save().then(function() {
-      console.log("Successfuly saved to parse");
-    }, function(error) {
-      alert("Error saving to parse")
-    });
-    var brick = new Parse.Object("Brick");
-    brick.set("Row", 2);
-    brick.set("Column", 2);
-    brick.set("Image", image);
-    brick.save();
-  }
 
 }
 

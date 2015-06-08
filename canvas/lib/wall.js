@@ -55,7 +55,7 @@ if (Meteor.isClient) {
       
       Parse.User.logIn(username, password, {
         success: function(user) {
-          console.log("User logged in.");
+          console.log(user.get("username") + " logged in.");
         },
         error: function(user, error) {
           console.log("Error: " + error.code + " " + error.message);
