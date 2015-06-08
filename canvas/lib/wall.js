@@ -33,6 +33,7 @@ if (Meteor.isClient) {
   function loadImage(id, ctx, w, h) {
     var rowIndex = id.indexOf("x") + 1;
     var colIndex = id.indexOf("y") + 1;
+
     var row = +id.slice(rowIndex, colIndex - 1);
     var col = +id.slice(colIndex, id.length);
     console.log("Loading brick at location " + row + ", " + col);
@@ -65,6 +66,14 @@ if (Meteor.isClient) {
     });
   }
 
+  // Click event to redirect to canvas 
+  Template.Block.events({
+    'click': function(e, template) {
+      var block = template.find('canvas');
+      var id    = block.id;
+      window.location.href = "/canvas/" + id;
+    }
+  });
 
   // User management
   Template.registerForm.events({  
