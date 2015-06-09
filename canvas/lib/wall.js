@@ -4,6 +4,21 @@ Parse.initialize("9QOijSH3c8VZ4OMuXSNtcyZ9DOlNCttX9iMsv1GL", "mbIy8g11RvZG6c2hoZ
 
 if (Meteor.isClient) {
 
+  //initialise popups
+  Template.logInPopup.onRendered(function() {
+    $('.log-popup-link').magnificPopup({
+      type:'inline',
+      midClick: true 
+    });
+  }); 
+
+  Template.registerPopup.onRendered(function() {
+    $('.reg-popup-link').magnificPopup({
+      type:'inline',
+      midClick: true 
+    }); 
+  });
+
   // Loading bricks for home page meta-wall
   Template.Wall.helpers({
     rows: function() {

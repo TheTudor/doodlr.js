@@ -1,8 +1,20 @@
 <!-- meteor canvas for full meta-wall view and login/register --> 
 <template name ="Wall">
-  {{> registerForm }}
-  {{> logInForm }}
+  <!-- register and login are links to pop-up forms, using magnific popup
+       meteor add gabrielengel:konecty-magnific-popup
+    -->
+  {{> logInPopup }}
+  {{> registerPopup }}
 
+  <!-- hidden divs to be loaded in popups -->
+  <div id="reg-popup" class="black-popup mfp-hide">
+    {{> registerForm }}
+  </div>
+  <div id="log-popup" class="black-popup mfp-hide">
+    {{> logInForm }}
+  </div>
+
+  <!-- main wall view with all the bricks -->
   <div class="wall">
     {{#each rows}}
       <div class="row">
@@ -14,10 +26,21 @@
   </div>
 </template>
 
+
+<!-- template for each block -->
 <template name="Block">
   <canvas id="{{block_id}}" class="block"></canvas>
 </template>
 
+<!-- templates for the register and login form popups -->
+<template name="registerPopup">
+  <a href="#reg-popup" class="reg-popup-link">Register</a>
+</template>
+<template name="logInPopup">
+  <a href="#log-popup" class="log-popup-link">Log in</a>
+</template>
+
+<!-- template for the register form -->
 <template name="registerForm">
   <form action="" method="GET">
     Username: <input type="text" name="username"><br>
@@ -27,6 +50,7 @@
   </form>
 </template>
   
+<!-- templates for the login form -->
 <template name="logInForm">
   <form action="" method="GET">
     Username: <input type="text" name="username"><br>
