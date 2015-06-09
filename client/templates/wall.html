@@ -1,0 +1,14 @@
+<template name ="Wall">
+  {{> RegisterForm }}
+  {{> LogInForm }}
+  
+  <div class="wall">
+    {{#each rows}}
+      <div class="wall-row">
+      {{#each blocks}}
+        {{> Block}}
+      {{/each}}
+      </div>
+    {{/each}}
+  </div>
+</template>

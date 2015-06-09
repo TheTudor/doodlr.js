@@ -1,0 +1,13 @@
+.wall {
+  margin: 0 auto;
+  margin-top: 20px;
+  width: 90%;
+}
+
+.wall-row:nth-child(even) {
+  margin-left: 10%;
+}
+
+.wall-row:nth-child(odd) {
+  margin-right: 10%;
+}
