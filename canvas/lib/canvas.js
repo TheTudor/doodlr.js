@@ -23,6 +23,7 @@ if(Meteor.isClient) {
 
   // Canvas 
   Template.canvas.onRendered(function () {
+    // prepare the canvas
     canvas = this.find('#canvas');
     ctx = canvas.getContext('2d');
     w = canvas.width;
@@ -30,6 +31,21 @@ if(Meteor.isClient) {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, w, h);
     loadImage(ctx);
+
+    // init the color picker
+    $("#colorpicker").spectrum({
+      color: "#000",
+      showInput: true,
+      className: "full-spectrum",
+      showPalette: false,
+      showSelectionPalette: true,
+      maxSelectionSize: 10,
+      preferredFormat: "hex",
+      localStorageKey: "spectrum.homepage",
+      change: function(c) {
+        pick_color(c);
+      },
+    });
   });
 
 
@@ -137,10 +153,9 @@ if(Meteor.isClient) {
 
  
   // -- Draw --------------------------------------------------------- //
-  // TODO new picker
-  // Get color from jscolor color picker
-  function pick_color(obj) {
-    color = '#' + obj.color;
+  // Get color from spectrum color picker
+  function pick_color(c) {
+    color = c.toHexString();
   }
  
   // Draws a dot at coordinates (currentX, currentY) 
