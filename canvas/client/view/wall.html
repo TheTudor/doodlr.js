@@ -1,10 +1,17 @@
 <!-- meteor canvas for full meta-wall view and login/register --> 
 <template name ="Wall">
-  <!-- register and login are links to pop-up forms, using magnific popup
-       meteor add gabrielengel:konecty-magnific-popup
-    -->
-  {{> logInPopup }}
-  {{> registerPopup }}
+  <div class="header">
+    <div class="name">
+    <a href="/"><h1>Doodlr.js</h1></a> 
+    <!-- register and login are links to pop-up forms, using magnific popup
+         meteor add gabrielengel:konecty-magnific-popup
+      -->
+    </div>
+    <div class="user">
+    {{> logInPopup }} |
+    {{> registerPopup }}
+    </div>
+  </div>
 
   <!-- hidden divs to be loaded in popups -->
   <div id="reg-popup" class="black-popup mfp-hide">
@@ -43,18 +50,18 @@
 <!-- template for the register form -->
 <template name="registerForm">
   <form action="" method="GET">
-    Username: <input type="text" name="username"><br>
-    Email: <input type="email" name="email"><br>
-    Password: <input type="password" name="password"><br>
-    <input type="submit" value="Register">
+    <label>Username</label> <br/><input type="text"     name="username"><br/>
+    <label>Email   </label> <br/><input type="email"    name="email"   ><br/>
+    <label>Password</label> <br/><input type="password" name="password"><br/>
+    <input type="submit" value="REGISTER">
   </form>
 </template>
   
 <!-- templates for the login form -->
 <template name="logInForm">
   <form action="" method="GET">
-    Username: <input type="text" name="username"><br>
-    Password: <input type="password" name="password"><br>
-    <input type="submit" value="Log in">
+    <label>Username</label> <br/><input type="text"     name="username"><br/>
+    <label>Password</label> <br/><input type="password" name="password"><br/>
+    <input type="submit" value="LOG IN">
   </form>
 </template>

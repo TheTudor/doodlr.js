@@ -23,9 +23,9 @@ if (Meteor.isClient) {
   Template.Wall.helpers({
     rows: function() {
       var rows = [];
-      for (var i = 1; i < 5; i++) {
+      for (var i = 1; i <= 5; i++) {
         var blocks = []
-        for (var j = 1; j < 5; j++) {
+        for (var j = 1; j <= 5; j++) {
           var id = "x" + i + "y" + j;
           blocks.push({ block_id: id });
         }

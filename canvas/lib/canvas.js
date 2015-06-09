@@ -2,7 +2,7 @@ Parse.initialize("9QOijSH3c8VZ4OMuXSNtcyZ9DOlNCttX9iMsv1GL", "mbIy8g11RvZG6c2hoZ
 
 // documentation http://docs.meteor.com/#/basic/Template-onRendered
 
-if (Meteor.isClient) {
+if(Meteor.isClient) {
 
   // TODO: remove global variables
   var canvas, ctx, w, h;
