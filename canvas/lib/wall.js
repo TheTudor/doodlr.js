@@ -8,14 +8,18 @@ if (Meteor.isClient) {
   Template.logInPopup.onRendered(function() {
     $('.log-popup-link').magnificPopup({
       type:'inline',
-      midClick: true 
+      midClick: true, 
+      removalDelay: 1000,
+      mainClass: 'fade-popup'
     });
-  }); 
+  });
 
   Template.registerPopup.onRendered(function() {
     $('.reg-popup-link').magnificPopup({
       type:'inline',
-      midClick: true 
+      midClick: true, 
+      removalDelay: 1000,
+      mainClass: 'fade-popup'
     }); 
   });
 
