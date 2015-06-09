@@ -1,12 +1,12 @@
 if (Meteor.isClient) {
   Template.RegisterForm.events({  
-    'submit form': function(event) {
+    'submit form': function(e) {
 
-      event.preventDefault();
+      e.preDefault();
 
-      var username = event.target.username.value;
-      var email = event.target.email.value;
-      var password = event.target.password.value;
+      var username = e.target.username.value;
+      var email = e.target.email.value;
+      var password = e.target.password.value;
     
       user = new Parse.User()
 
@@ -27,12 +27,12 @@ if (Meteor.isClient) {
   });
 
   Template.LogInForm.events({  
-    'submit form': function(event) {
+    'submit form': function(e) {
 
-      event.preventDefault();
+      e.preDefault();
 
-      var username = event.target.username.value;
-      var password = event.target.password.value;
+      var username = e.target.username.value;
+      var password = e.target.password.value;
       
       Parse.User.logIn(username, password, {
         success: function(user) {

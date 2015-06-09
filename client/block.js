@@ -1,14 +1,14 @@
 if (Meteor.isClient) {
   
   Template.Block.onRendered(function() {
-    loadBlockImage(this);
+    var canvas = this.find("canvas");
+    loadBlockImage(canvas);
   });
 
   Template.Block.events({
     'click' : function(e, template) {
-      var block = template.find('canvas');
-      var id = block.id;
-      Router.go("/canvas/" + id);
+      var canvas = template.find("canvas");
+      Router.go("/canvas/" + canvas.id);
     }
   });
 }
