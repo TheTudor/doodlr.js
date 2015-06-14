@@ -5,22 +5,18 @@ Parse.initialize("9QOijSH3c8VZ4OMuXSNtcyZ9DOlNCttX9iMsv1GL", "mbIy8g11RvZG6c2hoZ
 if(Meteor.isClient) {
 
   // TODO: remove global variables
-  var tool;
-
   var canvas, ctx, w, h;
-
-  var draw_flag = false,
-    previousX = 0,
-    currentX = 0,
-    previousY = 0,
-    currentY = 0;
 
   // Drawing parameters
   var color = "#000000",
     size = 2;
+  var tool;
+  var texture, brush, scatter;
+  var draw_flag = false,
+    x_0 = 0, x  = 0,
+    y_0 = 0, y  = 0;
 
-
-  // Canvas parameters
+  // Brick parameters
   var row, col;
 
   // Canvas 
@@ -30,6 +26,8 @@ if(Meteor.isClient) {
     ctx = canvas.getContext('2d');
     w = canvas.width;
     h = canvas.height;
+    shift_x = canvas.left;
+    shift_y = canvas.top;
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, w, h);
     loadImage(ctx);
@@ -45,7 +43,7 @@ if(Meteor.isClient) {
       preferredFormat: "hex",
       localStorageKey: "spectrum.homepage",
       change: function(c) {
-        color = e.hexToString();
+        pickColor(c);
       },
     });
   });
@@ -53,46 +51,45 @@ if(Meteor.isClient) {
 
   // Events 
   Template.canvas.events({
-      // Mouse events for drawing
-      'mousedown': function(e) {
-        get_coordinates('down', e);
-      },
-      'mouseup': function(e) {
-        get_coordinates('up', e);
-      },
-      'mousemove': function(e) {
-        get_coordinates('move', e);
-      },
-      'mouseout': function(e) {
-        get_coordinates('out', e);
-      },
-
       // Events for choosing tools
-      'click #select': function(e) {
+      'click #select' : function() {
         tool = "select";
         console.log("chosen select tool");
       },
-      'click #pencil': function(e) {
+      'click #pencil' : function() {
         tool = "pencil";
         console.log("chosen pencil tool");
       },
-      'click #brush': function(e) {
+      'click #brush'  : function() {
         tool = "brush";
         console.log("chosen brush tool");
       },
-      'click #spray': function(e) {
+      'click #spray'  : function() {
         tool = "spray";
         console.log("chosen spray tool");
       },
-      'click #shape': function(e) {
+      'click #shape'  : function() {
         tool = "shape";
         console.log("chosen shape tool");
       },
-      'click #eyedrop': function(e) {
+      'click #eyedrop': function() {
         tool = "eyedrop";
         console.log("chosen eyedropper tool");
       },
 
+      // Mouse events for drawing
+      'mousedown #canvas': function(e) {
+        handleDown(e);
+      },
+      'mouseup #canvas': function(e) {
+        handleUp(e);
+      },
+      'mousemove #canvas': function(e) {
+        handleMove(e);
+      },
+      'mouseout #canvas': function(e) {
+        handleUp(e);
+      },
 
       // Event to save canvas content
       'click .save-button': function(e) {
@@ -101,6 +98,114 @@ if(Meteor.isClient) {
     });
 
 
+  // -- Drawing utilities and tools ---------------------------------- //
+  // Color picking
+  function pickColor(c) {
+    color = c.toHexString();
+  }
+
+  function chooseColor(x, y) {
+    // Get the pixel's color
+    var p = ctx.getImageData(x, y, 1, 1).data;
+    var hex = "#" + (rgbToHex(p[0], p[1], p[2]));
+
+    // Set the color picker to that color
+    $("#colorpicker").spectrum("set", hex);
+    color = hex;
+
+  }
+
+  function rgbToHex(r, g, b) {
+    return ((r << 16) | (g << 8) | b).toString(16);
+  }
+
+
+  // Mouse events handler - points to the action to be taken depending on the tool chosen 
+  function handleDown(e) {
+    x_0 = x;
+    y_0 = y;
+    x = e.clientX - canvas.offsetLeft;
+    y = e.clientY - canvas.offsetTop;
+
+    draw_flag = true;
+    if(draw_flag) {
+      if(tool == "select") {  
+        selectStartPath(x, y);
+      }
+      if(tool == "pencil") {
+        drawDot(x, y);
+      }
+      if(tool == "brush") {
+        drawDot(x, y);
+      }
+      if(tool == "spray") {
+        drawDot(x, y);
+      }
+      if(tool == "shape") {
+        shapeStartPath(x, y);
+      }
+      if(tool == "eyedrop") {
+        chooseColor(x, y);
+      }
+    }
+  }
+
+  function handleMove(e) {
+    if(draw_flag) {
+      x_0 = x;
+      y_0 = y;
+      x = e.clientX - canvas.offsetLeft;
+      y = e.clientY - canvas.offsetTop;
+
+      if(tool == "select") {
+        selectDrawPath(x, y);
+      }
+      if(tool == "pencil") {
+        drawLine(x_0, y_0, x, y);
+      }
+      if(tool == "brush") {
+        drawLine(x_0, y_0, x, y);
+      }
+      if(tool == "spray") {
+        drawLine(x_0, y_0, x, y);
+      }
+      if(tool == "shape") {
+        shapeDrawPath(x, y);
+      }
+    }
+  }
+
+  function handleUp(e) {
+    draw_flag = false;
+  }
+
+
+  // Draws a dot at coordinates (currentX, currentY) 
+  // with lineWidth of size @size and strokeStyle of color @color
+  function drawDot(x, y) {
+    ctx.beginPath();
+
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, size, size);
+
+    ctx.closePath();
+  }
+
+  // Draws a line between coordinates (previousX, previousY), (currentX, currentY) 
+  // with lineWidth of size @size and strokeStyle of color @color
+  function drawLine(x_0, y_0, x, y) {
+    ctx.beginPath();
+
+    ctx.moveTo(x_0, y_0);
+    ctx.lineTo(x, y);
+    ctx.lineWidth   = size;
+    ctx.strokeStyle = color;
+
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+ 
   // -- Database ----------------------------------------------------- //
   // Load Image from Parse
   function loadImage(ctx) {
@@ -181,65 +286,6 @@ if(Meteor.isClient) {
   }
 
  
-  // -- Drawing utilities and tools ---------------------------------- //
- 
-  // Draws a dot at coordinates (currentX, currentY) 
-  // with lineWidth of size @size and strokeStyle of color @color
-  function draw_dot() {
-    ctx.beginPath();
-
-    ctx.fillStyle = color;
-    ctx.fillRect(currentX, currentY, size, size);
-
-    ctx.closePath();
-  }
-
-  // Draws a line between coordinates (previousX, previousY), (currentX, currentY) 
-  // with lineWidth of size @size and strokeStyle of color @color
-  function draw_line() {
-    ctx.beginPath();
-
-    ctx.moveTo(previousX, previousY);
-    ctx.lineTo(currentX, currentY);
-    ctx.lineWidth   = size;
-    ctx.strokeStyle = color;
-
-    ctx.stroke();
-    ctx.closePath();
-  }
-
-  // Gets coordinates of mouse click and performs corresponding action
-  // Actual drawing happens here 
-  function get_coordinates(action, e) {
-    // On mousedown, draw first dot on location
-    if (action == 'down') {
-      previousX = currentX;
-      previousY = currentY;
-      currentX = e.clientX - canvas.offsetLeft;
-      currentY = e.clientY - canvas.offsetTop;
-
-      draw_flag = true;
-      if (draw_flag) {
-        draw_dot();
-      }
-    }
-    // On mouse up or mouse out, no action (can't draw outside canvas)
-    if (action == 'up' || action == "out") {
-      draw_flag = false;
-    }
-    // On mousemove, draw line between move coordinates
-    if (action == 'move') {
-      if (draw_flag) {
-          previousX = currentX;
-          previousY = currentY;
-          currentX = e.clientX - canvas.offsetLeft;
-          currentY = e.clientY - canvas.offsetTop;
-
-          draw_line();
-      }
-    }
-  }
-
 
 }
 
