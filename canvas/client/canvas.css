@@ -1,17 +1,22 @@
 /* toolbox */
 #tools {
-  position: absolute;
-  top:0;
-  left:0;
-  height: 720px;
-  width: 49px;
-  float: left;
+  height: 49px;
+  width: 720px;
 }
 
 #select, #pencil, #brush, #spray, #shape, #eyedrop {
+  display: inline-block;
   height: 49px;
+  margin-left: 2px;
   width: 49px;
-  margin-bottom: 2px;
+}
+.full-spectrum {
+  border: 0;
+  display: inline-block; 
+  height: 40px;
+  margin-left: 2px;
+  margin-top: -35px;
+  width: 40px;
 }
 #select {  
   background-image: url('http://i.imgur.com/AuWgd6R.png');
@@ -44,12 +49,13 @@
   background-repeat: no-repeat;
 }
 
-#colorpicker {
-  width: 50px;
-}
-canvas {
-  padding: 0 0 0 52px;
-  position: abolute;
-  top: 0;
-  left: 52px;
+
+/* selection area in canvas */
+.selectarea {
+  border: 1px dashed #666;
+  box-sizing:border-box;
+  -moz-box-sizing:border-box;
+  -webkit-box-sizing:border-box;
+  position: absolute; 
+  z-index: 1000;
 }

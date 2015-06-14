@@ -1,5 +1,10 @@
 <!-- meteor template for canvas -->
 <template name='canvas'>
+  <!-- canvas --> 
+  <div id="canvas-wrapper">
+  <canvas id="canvas" class="canvas" width="1280" height="720"></canvas>
+  </div>
+  <!-- save button - saves current canvas contents to database -->
   <div id = "tools">
     <div id = "select">  </div>
     <div id = "pencil">  </div>
@@ -12,9 +17,5 @@
     <input type="text" id="colorpicker">
   </div>
  
-  <!-- canvas --> 
-  <canvas id="canvas" class="canvas" width="1280" height="720"></canvas>
-  <br/>
-  <!-- save button - saves current canvas contents to database -->
   <button class="save-button">Save</button>
 </template>

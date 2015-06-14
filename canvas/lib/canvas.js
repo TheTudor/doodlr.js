@@ -5,7 +5,7 @@ Parse.initialize("9QOijSH3c8VZ4OMuXSNtcyZ9DOlNCttX9iMsv1GL", "mbIy8g11RvZG6c2hoZ
 if(Meteor.isClient) {
 
   // TODO: remove global variables
-  var canvas, ctx, w, h;
+  var canvas, ctx, w, h, shift_x, shift_y;
 
   // Drawing parameters
   var color = "#000000",
@@ -62,10 +62,12 @@ if(Meteor.isClient) {
       },
       'click #brush'  : function() {
         tool = "brush";
+        size = 10;
         console.log("chosen brush tool");
       },
       'click #spray'  : function() {
         tool = "spray";
+        size = 100;
         console.log("chosen spray tool");
       },
       'click #shape'  : function() {
@@ -99,6 +101,14 @@ if(Meteor.isClient) {
 
 
   // -- Drawing utilities and tools ---------------------------------- //
+  // Get coordinates of mouse click
+  function refreshCoordinates(e) {
+    x_0 = x;
+    y_0 = y;
+    x = e.clientX - canvas.offsetLeft + document.body.scrollLeft;
+    y = e.clientY - canvas.offsetTop + document.body.scrollTop;
+  }
+
   // Color picking
   function pickColor(c) {
     color = c.toHexString();
@@ -122,16 +132,14 @@ if(Meteor.isClient) {
 
   // Mouse events handler - points to the action to be taken depending on the tool chosen 
   function handleDown(e) {
-    x_0 = x;
-    y_0 = y;
-    x = e.clientX - canvas.offsetLeft;
-    y = e.clientY - canvas.offsetTop;
+    refreshCoordinates(e);
+
+    if(tool == "select") {  
+      selectStartEndPath(x, y); //TODO nasty magic number
+    }
 
     draw_flag = true;
     if(draw_flag) {
-      if(tool == "select") {  
-        selectStartPath(x, y);
-      }
       if(tool == "pencil") {
         drawDot(x, y);
       }
@@ -144,22 +152,20 @@ if(Meteor.isClient) {
       if(tool == "shape") {
         shapeStartPath(x, y);
       }
-      if(tool == "eyedrop") {
-        chooseColor(x, y);
-      }
+    }
+
+    if(tool == "eyedrop") {
+      chooseColor(x, y);
     }
   }
 
   function handleMove(e) {
-    if(draw_flag) {
-      x_0 = x;
-      y_0 = y;
-      x = e.clientX - canvas.offsetLeft;
-      y = e.clientY - canvas.offsetTop;
+    refreshCoordinates(e);
 
-      if(tool == "select") {
-        selectDrawPath(x, y);
-      }
+    if(tool == "select") {
+        selectDrawPath(x, y); //TODO nasty magic number
+    }
+    if(draw_flag) {
       if(tool == "pencil") {
         drawLine(x_0, y_0, x, y);
       }
@@ -180,6 +186,51 @@ if(Meteor.isClient) {
   }
 
 
+  //
+  // SELECTION
+
+  // adds a pseudo div element (which is the select area)
+  // to the ghost canvas to mark the selection (a div element generated for this)
+
+  var selectStartX, selectStartY;
+  var selectarea = null;
+
+  function selectDrawPath(x, y) {
+    if (selectarea !== null) {
+      selectarea.style.width  = Math.abs(x - selectStartX) + 'px';
+      selectarea.style.height = Math.abs(y - selectStartY) + 'px';
+      selectarea.style.left   = (x - selectStartX < 0) ? x + 'px' : selectStartX + 'px';
+      selectarea.style.top    = (y - selectStartY < 0) ? y + 'px' : selectStartY + 'px';
+    }
+  }
+  
+  function selectStartEndPath(x, y) {
+
+    if(selectarea != null) {
+      console.log("end selection at (" + x + ", " + y + ")"); 
+      selectarea = null;
+      canvas.style.cursor = "default";
+    }
+    else {
+      // initialise selection
+
+      selectStartX = x;
+      selectStartY = y;
+      console.log("begin selection at (" + x + ", " + y + ")"); 
+      selectarea = document.createElement('div');
+      selectarea.className = 'selectarea';
+      selectarea.style.left = x + 'px'; 
+      selectarea.style.top = y + 'px';
+
+      document.getElementById("canvas-wrapper").appendChild(selectarea);
+      canvas.style.cursor = "crosshair";
+    }
+  }
+
+
+  //
+  // DRAWING - PENCIL, BRUSH, SPRAY
+
   // Draws a dot at coordinates (currentX, currentY) 
   // with lineWidth of size @size and strokeStyle of color @color
   function drawDot(x, y) {
@@ -189,6 +240,7 @@ if(Meteor.isClient) {
     ctx.fillRect(x, y, size, size);
 
     ctx.closePath();
+    console.log(x, y);
   }
 
   // Draws a line between coordinates (previousX, previousY), (currentX, currentY) 
