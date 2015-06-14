@@ -5,6 +5,8 @@ Parse.initialize("9QOijSH3c8VZ4OMuXSNtcyZ9DOlNCttX9iMsv1GL", "mbIy8g11RvZG6c2hoZ
 if(Meteor.isClient) {
 
   // TODO: remove global variables
+  var tool;
+
   var canvas, ctx, w, h;
 
   var draw_flag = false,
@@ -43,7 +45,7 @@ if(Meteor.isClient) {
       preferredFormat: "hex",
       localStorageKey: "spectrum.homepage",
       change: function(c) {
-        pick_color(c);
+        color = e.hexToString();
       },
     });
   });
@@ -64,6 +66,33 @@ if(Meteor.isClient) {
       'mouseout': function(e) {
         get_coordinates('out', e);
       },
+
+      // Events for choosing tools
+      'click #select': function(e) {
+        tool = "select";
+        console.log("chosen select tool");
+      },
+      'click #pencil': function(e) {
+        tool = "pencil";
+        console.log("chosen pencil tool");
+      },
+      'click #brush': function(e) {
+        tool = "brush";
+        console.log("chosen brush tool");
+      },
+      'click #spray': function(e) {
+        tool = "spray";
+        console.log("chosen spray tool");
+      },
+      'click #shape': function(e) {
+        tool = "shape";
+        console.log("chosen shape tool");
+      },
+      'click #eyedrop': function(e) {
+        tool = "eyedrop";
+        console.log("chosen eyedropper tool");
+      },
+
 
       // Event to save canvas content
       'click .save-button': function(e) {
@@ -152,11 +181,7 @@ if(Meteor.isClient) {
   }
 
  
-  // -- Draw --------------------------------------------------------- //
-  // Get color from spectrum color picker
-  function pick_color(c) {
-    color = c.toHexString();
-  }
+  // -- Drawing utilities and tools ---------------------------------- //
  
   // Draws a dot at coordinates (currentX, currentY) 
   // with lineWidth of size @size and strokeStyle of color @color

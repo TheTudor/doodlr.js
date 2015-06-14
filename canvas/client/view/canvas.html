@@ -1,11 +1,17 @@
 <!-- meteor template for canvas -->
 <template name='canvas'>
-  <!-- color picker -->
-  <h1>Draw</h1>
-  <br/>
-  <!-- colorpicker 
-       meteor add ryanswapp:spectrum-colorpicker -->
-  <input type="text" id="colorpicker"><br/>
+  <div id = "tools">
+    <div id = "select">  </div>
+    <div id = "pencil">  </div>
+    <div id = "brush">   </div>
+    <div id = "spray">   </div>
+    <div id = "shape">   </div>
+    <div id = "eyedrop"> </div>
+    <!-- colorpicker 
+         meteor add ryanswapp:spectrum-colorpicker -->
+    <input type="text" id="colorpicker">
+  </div>
+ 
   <!-- canvas --> 
   <canvas id="canvas" class="canvas" width="1280" height="720"></canvas>
   <br/>

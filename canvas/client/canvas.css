@@ -1,6 +1,55 @@
+/* toolbox */
+#tools {
+  position: absolute;
+  top:0;
+  left:0;
+  height: 720px;
+  width: 49px;
+  float: left;
+}
+
+#select, #pencil, #brush, #spray, #shape, #eyedrop {
+  height: 49px;
+  width: 49px;
+  margin-bottom: 2px;
+}
+#select {  
+  background-image: url('http://i.imgur.com/AuWgd6R.png');
+  background-position: 0px 0px; 
+  background-repeat: no-repeat;
+} 
+#pencil { 
+  background-image: url('http://i.imgur.com/AuWgd6R.png');
+  background-position: 0px -51px;  
+  background-repeat: no-repeat;
+} 
+#brush { 
+  background-image: url('http://i.imgur.com/AuWgd6R.png');
+  background-position: 0px -102px;  
+  background-repeat: no-repeat;
+} 
+#spray { 
+  background-image: url('http://i.imgur.com/AuWgd6R.png');
+  background-position: 0px -153px;  
+  background-repeat: no-repeat;
+} 
+#shape { 
+  background-image: url('http://i.imgur.com/AuWgd6R.png');
+  background-position: 0px -204px;  
+  background-repeat: no-repeat;
+} 
+#eyedrop {
+  background-image: url('http://i.imgur.com/AuWgd6R.png');
+  background-position: 0px -255px;  
+  background-repeat: no-repeat;
+}
+
 #colorpicker {
-  width: 30px;
+  width: 50px;
 }
 canvas {
-  padding: 0 10px;
+  padding: 0 0 0 52px;
+  position: abolute;
+  top: 0;
+  left: 52px;
 }
