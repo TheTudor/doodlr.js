@@ -1,24 +1,115 @@
-Parse.initialize("9QOijSH3c8VZ4OMuXSNtcyZ9DOlNCttX9iMsv1GL", "mbIy8g11RvZG6c2hoZ9IHumiEGszjWyACcaOcsHg");
+// COLOR LIBRARY
+// colour conversions adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+var Color = {
+  rgbToHex : function(r, g, b) {
+    return ("#" + ((r << 16) | (g << 8) | b).toString(16));
+  },
 
-// documentation http://docs.meteor.com/#/basic/Template-onRendered
+  hexToRgb : function(hex) {
+   return 0; 
+  },
+
+  rgbToHsl : function(r, g, b) {
+    r /= 255, g /= 255, b /= 255;
+    var max = Math.max(r, g, b),
+        min = Math.min(r, g, b);
+    var h, s, l;
+
+    // luminance is average of brightest and darkest       
+    l = (max + min) / 2; 
+
+    // calculate the hue
+    if (max == min) {
+      h = s = 0; // achromatic
+    } 
+    else {
+      var dif = max - min;
+      s = l > 0.5 
+        ? dif / (2 - max - min) 
+        : dif / (max + min); // saturation given by range of intensity 
+
+      // hue is given by dominant
+      switch (max) {
+          case r: h = (g - b) / dif + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / dif + 2;               break;
+          case b: h = (r - g) / dif + 4;               break;
+      }
+      h /= 6;
+    }
+
+    return ({ h: h, s: s, l: l });
+  },
+
+  hslToRgb : function(h, s, l) {
+    var r, g, b;
+
+    if (s == 0) {
+      r = g = b = l; // achromatic
+    } else {
+      var q = l < 0.5  // first find chroma 
+            ? l * (1 + s)  
+            : l + s - l * s;
+      var p = 2 * l - q;
+      r = hueToRgb(p, q, h + 1 / 3);
+      g = hueToRgb(p, q, h);
+      b = hueToRgb(p, q, h - 1 / 3);
+    }
+
+    return ({
+      r: Math.round(r * 255),
+      g: Math.round(g * 255),
+      b: Math.round(b * 255),
+    });
+  },
+
+  hueToRgb : function(p, q, t) {  // based on HSL to RGB formula
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  }
+}
+  
+
+// DISTANCE LIBRARY
+var Dist = {
+  distance : function(point1, point2) {
+    var dx = point1.x - point2.x; 
+        dy = point1.y - point2.y;
+    return parseInt(Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)));
+  },
+  angle : function(point1, point2) {
+    var dx = point1.x - point2.x, 
+        dy = point1.y - point2.y;
+    return Math.atan2(dx, dy);
+  } 
+} 
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+Parse.initialize("9QOijSH3c8VZ4OMuXSNtcyZ9DOlNCttX9iMsv1GL", "mbIy8g11RvZG6c2hoZ9IHumiEGszjWyACcaOcsHg");
 
 if(Meteor.isClient) {
 
-  // TODO: remove global variables
-  var canvas, ctx, w, h, shift_x, shift_y;
+  var canvas, ctx, w, h;
+  var tool,
+    texture, brush, scatter;   
+  var color, size, opacity;
 
-  // Drawing parameters
-  var color = "#000000",
-    size = 2;
-  var tool;
-  var texture, brush, scatter;
-  var draw_flag = false,
-    x_0 = 0, x  = 0,
-    y_0 = 0, y  = 0;
+  var draw_flag = false;
+
+  var prev      = { x:0, y:0 };
+  var curr   = { x:0, y:0 };
 
   // Brick parameters
   var row, col;
 
+
+  //
   // Canvas 
   Template.canvas.onRendered(function () {
     // prepare the canvas
@@ -26,11 +117,19 @@ if(Meteor.isClient) {
     ctx = canvas.getContext('2d');
     w = canvas.width;
     h = canvas.height;
-    shift_x = canvas.left;
-    shift_y = canvas.top;
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, w, h);
     loadImage(ctx);
+
+    // init all tools
+    color = "#000000",
+    size = 2;
+
+    // defaults
+    tool = "pencil";
+    brush = new Image();
+    brush.src = 'http://i.imgur.com/zA1il03.png';
+
 
     // init the color picker
     $("#colorpicker").spectrum({
@@ -49,6 +148,7 @@ if(Meteor.isClient) {
   });
 
 
+  //
   // Events 
   Template.canvas.events({
       // Events for choosing tools
@@ -95,18 +195,21 @@ if(Meteor.isClient) {
 
       // Event to save canvas content
       'click .save-button': function(e) {
-        saveImage('click', e, row, col);
+        saveImage(e, row, col);
       }
     });
 
 
+
   // -- Drawing utilities and tools ---------------------------------- //
+
+  //
   // Get coordinates of mouse click
   function refreshCoordinates(e) {
-    x_0 = x;
-    y_0 = y;
-    x = e.clientX - canvas.offsetLeft + document.body.scrollLeft;
-    y = e.clientY - canvas.offsetTop + document.body.scrollTop;
+    prev.x = curr.x;
+    prev.y = curr.y;
+    curr.x = e.clientX - canvas.offsetLeft + document.body.scrollLeft;
+    curr.y = e.clientY - canvas.offsetTop  + document.body.scrollTop;
   }
 
   // Color picking
@@ -117,17 +220,13 @@ if(Meteor.isClient) {
   function chooseColor(x, y) {
     // Get the pixel's color
     var p = ctx.getImageData(x, y, 1, 1).data;
-    var hex = "#" + (rgbToHex(p[0], p[1], p[2]));
+    var hex = Color.rgbToHex(p[0], p[1], p[2]);
 
     // Set the color picker to that color
     $("#colorpicker").spectrum("set", hex);
     color = hex;
-
   }
 
-  function rgbToHex(r, g, b) {
-    return ((r << 16) | (g << 8) | b).toString(16);
-  }
 
 
   // Mouse events handler - points to the action to be taken depending on the tool chosen 
@@ -135,54 +234,55 @@ if(Meteor.isClient) {
     refreshCoordinates(e);
 
     if(tool == "select") {  
-      selectStartEndPath(x, y); //TODO nasty magic number
+      selectStartEndPath(curr); 
     }
 
-    draw_flag = true;
+    draw_flag = true;  // on mouse down, start drawing
     if(draw_flag) {
       if(tool == "pencil") {
-        drawDot(x, y);
+        drawDot(curr);
       }
       if(tool == "brush") {
-        drawDot(x, y);
+        drawSingleStroke(curr);
       }
       if(tool == "spray") {
-        drawDot(x, y);
+        drawSingleSpray(curr);
       }
       if(tool == "shape") {
-        shapeStartPath(x, y);
+        shapeStartPath(curr);
       }
     }
 
     if(tool == "eyedrop") {
-      chooseColor(x, y);
+      chooseColor(curr);
     }
   }
-
+  //
   function handleMove(e) {
     refreshCoordinates(e);
 
     if(tool == "select") {
-        selectDrawPath(x, y); //TODO nasty magic number
+        selectDrawPath(curr);
     }
-    if(draw_flag) {
+
+    if(draw_flag) {   // keep drawing on mouse move as long as mouse is down
       if(tool == "pencil") {
-        drawLine(x_0, y_0, x, y);
+        drawLine(prev, curr);
       }
       if(tool == "brush") {
-        drawLine(x_0, y_0, x, y);
+        drawStroke(prev, curr);
       }
       if(tool == "spray") {
-        drawLine(x_0, y_0, x, y);
+        drawSpray(prev, curr);
       }
       if(tool == "shape") {
-        shapeDrawPath(x, y);
+        shapeDrawPath(curr);
       }
     }
   }
 
   function handleUp(e) {
-    draw_flag = false;
+    draw_flag = false;  // mouse up, stop drawing
   }
 
 
@@ -190,12 +290,14 @@ if(Meteor.isClient) {
   // SELECTION
 
   // adds a pseudo div element (which is the select area)
-  // to the ghost canvas to mark the selection (a div element generated for this)
+  // to the div element underneath the canvas 
 
   var selectStartX, selectStartY;
   var selectarea = null;
 
-  function selectDrawPath(x, y) {
+  function selectDrawPath(curr) {
+    var x = curr.x, y = curr.y;
+
     if (selectarea !== null) {
       selectarea.style.width  = Math.abs(x - selectStartX) + 'px';
       selectarea.style.height = Math.abs(y - selectStartY) + 'px';
@@ -204,7 +306,8 @@ if(Meteor.isClient) {
     }
   }
   
-  function selectStartEndPath(x, y) {
+  function selectStartEndPath(curr) {
+    var x = curr.x, y = curr.y;
 
     if(selectarea != null) {
       console.log("end selection at (" + x + ", " + y + ")"); 
@@ -229,33 +332,48 @@ if(Meteor.isClient) {
 
 
   //
-  // DRAWING - PENCIL, BRUSH, SPRAY
+  // DRAWING - PENCIL
 
-  // Draws a dot at coordinates (currentX, currentY) 
-  // with lineWidth of size @size and strokeStyle of color @color
-  function drawDot(x, y) {
+  function drawDot(curr) {
     ctx.beginPath();
-
     ctx.fillStyle = color;
-    ctx.fillRect(x, y, size, size);
-
+    ctx.fillRect(curr.x, curr.y, size, size);
     ctx.closePath();
-    console.log(x, y);
   }
-
-  // Draws a line between coordinates (previousX, previousY), (currentX, currentY) 
-  // with lineWidth of size @size and strokeStyle of color @color
-  function drawLine(x_0, y_0, x, y) {
+  function drawLine(prev, curr) {
     ctx.beginPath();
 
-    ctx.moveTo(x_0, y_0);
-    ctx.lineTo(x, y);
+    ctx.moveTo(prev.x, prev.y);
+    ctx.lineTo(curr.x, curr.y);
     ctx.lineWidth   = size;
     ctx.strokeStyle = color;
 
     ctx.stroke();
     ctx.closePath();
   }
+
+ 
+  //
+  // DRAWING - BRUSH
+  function drawSingleStroke(curr) {
+    ctx.drawImage(brush, curr.x - brush.height/2, curr.y - brush.height/2);
+  }
+  function drawStroke(prev, curr) {
+    var halfH = brush.height/2;
+    var halfW = brush.width/2;
+    var dist  = Dist.distance(prev, curr);
+    var alpha = Dist.angle(prev, curr);
+
+    var x, y;
+
+    for(var i = 0; (i <= dist || i == 0); i++) {
+      x = prev.x + (Math.sin(alpha) * i) - halfW;
+      y = prev.y + (Math.cos(alpha) * i) - halfH;
+      ctx.drawImage(brush, x, y);
+    }
+  }
+
+  // change brush color
 
  
   // -- Database ----------------------------------------------------- //
@@ -293,7 +411,7 @@ if(Meteor.isClient) {
   }
 
   // Save Image to Parse
-  function saveImage(action, e, row, col) {
+  function saveImage(e, row, col) {
     // First get the image
     var imageData = canvas.toDataURL();
     var imageBase64 = imageData.replace(/^data:image\/(png|jpg);base64,/, ""); //magic, do not touch
@@ -308,7 +426,7 @@ if(Meteor.isClient) {
 
     query.first({
       success: function(brick) {
-        // finds a brick, thus updates the current one
+        // finds a brick, thus updates the curr one
         if(brick != undefined) {
           brick.set("image", image);
 
@@ -344,6 +462,6 @@ if(Meteor.isClient) {
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
-    // code to run on server at startup
+    // code to run on server at prevup
   });
 }
