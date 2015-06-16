@@ -112,7 +112,7 @@ var Editor = {
   pencilTexture: null, 
   pencilSize:    2,
   brushTexture:  null,
-  brushSize:     10, 
+  brushSize:     100, 
   brushOpacity:  0.5,
   sprayTexture:  null, 
   sprayStencil:  null,
@@ -139,6 +139,9 @@ var Editor = {
     this.h = this.can.height;
     this.ctx.fillStyle = '#fff';
     this.ctx.fillRect(0, 0, this.w, this.h);
+
+    this.setPencilTexture("/pencil0.png");
+    this.setBrushTexture("/brush1.png");
   },
 
   setTool: function(toolName) {
@@ -154,11 +157,15 @@ var Editor = {
   setPencilSize: function(pencilSize) {
     this.pencilSize = pencilSize;
   },
-  setBrush: function(brushSize, textureUrl, brushOpacity) {
-    this.brushSize = brushSize;
+  setBrushTexture: function(textureUrl) {
     this.brushTexture = new Image();
     this.brushTexture.src = textureUrl;
     this.brushTexture.setAttribute('crossOrigin', 'anonymous');
+  },
+  setBrushSize: function(brushSize) {
+    this.brushSize = brushSize;
+  },
+  setBrushOpacity: function(brushOpacity) {
     this.brushOpacity = brushOpacity;
   },
   setSpray: function(userSize, textureUrl, stencilUrl, sprayOpacity) {
@@ -244,38 +251,22 @@ var Editor = {
     }
   },
 
-
   //
   // pencil
   drawDot: function() {
     this.drawTextureDot(this.pencilSize, this.pencilTexture, 1, this.color); 
   },
   drawLine: function() {
-    this.drawTextureLine(this.pencilSize, this.pencilTexture, 1, this.color); 
+    this.drawTextureLine(this.pencilSize, this.pencilTexture, 0.5, this.color); 
   },
 
- 
   //
   // brush
   drawSingleStroke: function() {
-    this.ctx.save();
-    this.ctx.globalAlpha = this.brushOpacity;
-    this.ctx.drawImage(this.brushTexture, this.curr.x - this.brushTexture.height/2, this.curr.y - this.brushTexture.height/2);
-    this.ctx.restore();
+    this.drawTextureDot(this.brushSize, this.brushTexture, this.brushOpacity, this.color); 
   },
   drawStroke: function() {
-    var halfH = this.brushTexture.height/2;
-    var halfW = this.brushTexture.width/2;
-    var dist  = Dist.distance(this.prev, this.curr);
-    var alpha = Dist.angle(this.prev, this.curr);
-
-    var x, y;
-
-    for(var i = 0; (i <= dist || i == 0); i++) {
-      x = this.prev.x + (Math.sin(alpha) * i) - halfW;
-      y = this.prev.y + (Math.cos(alpha) * i) - halfH;
-      this.ctx.drawImage(this.brushTexture, x, y);
-    }
+    this.drawTextureLine(this.brushSize, this.brushTexture, this.brushOpacity, this.color); 
   },
 
   // drawing helper
@@ -295,7 +286,7 @@ var Editor = {
     var dist  = Dist.distance(this.prev, this.curr);
     var alpha = Dist.angle(this.prev, this.curr);
     var x, y;
-    for(var i = 0; (i <= dist || i == 0); i++) {
+    for(var i = 0; (i <= dist || i == 0); i+=10) {
       x = this.prev.x + (Math.sin(alpha) * i) - brush.width/2;
       y = this.prev.y + (Math.cos(alpha) * i) - brush.height/2;
       this.ctx.save();
@@ -344,11 +335,6 @@ if(Meteor.isClient) {
     Editor.canvasInit(canvas);
     loadImage(Editor.ctx);
  
-    // init tools
-    Editor.setPencilSize(2);
-    Editor.setPencilTexture('/pencil0.png');
-    Editor.setBrush(2, '/brush1.png', 0.5);
-
     // init the color picker
     $("#colorpicker").spectrum({
       color: "#000",
@@ -409,10 +395,10 @@ if(Meteor.isClient) {
     }
    });
 
-  // array of pencil textures
+  // arrays of pencil and brush textures
   var pencilTextures = [ '/pencil0.png', '/pencil1.png', '/pencil2.png', '/pencil3.png' ];
-
-  // load the textures into their elements
+  var brushTextures  = [ '/brush0.png', '/brush1.png', '/brush2.png', '/brush3.png', '/brush4.png' ];
+  // load pencil the textures into their elements
   Template.PencilProperties.helpers({
     pencilTextures: function() {
       var textures = [];
@@ -423,29 +409,40 @@ if(Meteor.isClient) {
       return textures;
     }
   });
+  // load the brush textures into their elements
+  Template.BrushProperties.helpers({
+    brushTextures: function() {
+      var textures = [];
+      for(var i = 0; i < brushTextures.length; i++) {
+        var id = 'brush' + i;
+        textures.push({ id: id, image: brushTextures[i] });
+      }
+      return textures;
+    }
+  });
 
-  // pencil properties: texture, size, opacity
+  // pencil properties: texture, size
   Template.PencilProperties.events({
     // pencil change texture
     'click #pencil0': function(e, template) {
       var allTextures = template.findAll('.pencilTexture');
       var textureImg  = template.find('#pencil0');
-      updateTexture(allTextures, textureImg);
+      updateTexture(allTextures, textureImg, "pencil");
     },
     'click #pencil1': function(e, template) {
       var allTextures = template.findAll('.pencilTexture');
       var textureImg  = template.find('#pencil1');
-      updateTexture(allTextures, textureImg);
+      updateTexture(allTextures, textureImg, "pencil");
     },
     'click #pencil2': function(e, template) {
       var allTextures = template.findAll('.pencilTexture');
       var textureImg  = template.find('#pencil2');
-      updateTexture(allTextures, textureImg);
+      updateTexture(allTextures, textureImg, "pencil");
     },
     'click #pencil3': function(e, template) {
       var allTextures = template.findAll('.pencilTexture');
       var textureImg  = template.find('#pencil3');
-      updateTexture(allTextures, textureImg);
+      updateTexture(allTextures, textureImg, "pencil");
     },
     // pencil change width
     'change #pencil-width': function(e, template) {
@@ -469,14 +466,86 @@ if(Meteor.isClient) {
     },
     
   });
-  updateTexture = function(all, selected) {
+  // brush properties: texture, size, opacity
+  Template.BrushProperties.events({
+    // brush change texture
+    'click #brush0': function(e, template) {
+      var allTextures = template.findAll('.brushTexture');
+      var textureImg  = template.find('#brush0');
+      updateTexture(allTextures, textureImg, "brush");
+    },
+    'click #brush1': function(e, template) {
+      var allTextures = template.findAll('.brushTexture');
+      var textureImg  = template.find('#brush1');
+      updateTexture(allTextures, textureImg, "brush");
+    },
+    'click #brush2': function(e, template) {
+      var allTextures = template.findAll('.brushTexture');
+      var textureImg  = template.find('#brush2');
+      updateTexture(allTextures, textureImg, "brush");
+    },
+    'click #brush3': function(e, template) {
+      var allTextures = template.findAll('.brushTexture');
+      var textureImg  = template.find('#brush3');
+      updateTexture(allTextures, textureImg, "brush");
+    },
+    'click #brush4': function(e, template) {
+      var allTextures = template.findAll('.brushTexture');
+      var textureImg  = template.find('#brush4');
+      updateTexture(allTextures, textureImg, "brush");
+    },
+    // brush change width
+    'change #brush-width': function(e, template) {
+      var size = template.find('#brush-width').value;
+      var textField = template.find('#brush-width-field');
+      textField.value = size;
+      Editor.setBrushSize(size);
+      console.log("set brush size " + size);
+    },
+    'change #brush-width-field': function(e, template) {
+      var slider = template.find('#brush-width');
+      var size = template.find('#brush-width-field').value;
+      if (size < 1 || size > 4) {
+        console.log("invalid brush size");  // TODO: add some visual error
+      }
+      else {
+        slider.value = size;
+        Editor.setBrushSize(size);
+        console.log("set brush size " + size);
+      }
+    },
+    // brush change opacity
+    'change #brush-opacity': function(e, template) {
+      var opacity = template.find('#brush-opacity').value/100;
+      var textField = template.find('#brush-opacity-field');
+      textField.value = opacity;
+      Editor.setBrushOpacity(opacity);
+      console.log("set brush opacity " + opacity);
+    },
+    'change #brush-opacity-field': function(e, template) {
+      var slider = template.find('#brush-opacity');
+      var opacity = template.find('#brush-opacity-field').value;
+      if (opacity < 0 || opacity > 1) {
+        console.log("invalid brush opacity");  // TODO: add some visual error
+      }
+      else {
+        slider.value = opacity * 100;
+        Editor.setBrushOpacity(opacity);
+        console.log("set brush opacity " + opacity);
+      }
+    },
+  });
+    
+  updateTexture = function(all, selected, tool) {
     all.forEach(function(elem) {
         elem.style.border = "0";
       }
     );
     selected.style.border = "1.5px solid yellow";
-    Editor.setPencilTexture(selected.src);
-    console.log("set pencil texture " + selected.src);
+    if(tool == "pencil") Editor.setPencilTexture(selected.src);
+    if(tool == "brush")  Editor.setBrushTexture(selected.src);
+    
+    console.log("set " + tool + " texture " + selected.src);
   }
 
 

@@ -46,11 +46,9 @@
 <template name="BrushProperties">
   <div id = "brush-prop" class="prop">
     <div class="texture">
-      <div id = "brush1"></div>
-      <div id = "brush2"></div>
-      <div id = "brush3"></div>
-      <div id = "brush4"></div>
-      <div id = "brush5"></div>
+      {{#each brushTextures}}
+        {{> BrushTextureDiv}}
+      {{/each}}
     </div>
     <div class="width">
       <h3>WIDTH</h3>
@@ -59,9 +57,13 @@
     </div>
     <div class="opacity">
       <h3>OPACITY</h3>
-      <input id="brush-opacity" type="range" value="100" min="0" max="100">
-      <input id="brush-opacity-field" type="text" value="1">
+      <input id="brush-opacity" type="range" value="50" min="0" max="100">
+      <input id="brush-opacity-field" type="text" value="0.5">
     </div>
   </div>
+</template>
+
+<template name="BrushTextureDiv">
+  <div><img id="{{id}}" class="brushTexture" src={{image}} height=50 width=50></div>
 </template>
 
