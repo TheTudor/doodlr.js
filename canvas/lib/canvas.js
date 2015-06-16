@@ -91,22 +91,114 @@ var Dist = {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-// DRAWING LIBRARY
 
-// Tools objects
-var Select = {
+// DRAWING LIBRARY
+// Object with all the editor data
+var Editor = {
+  // canvas
+  can: null,
+  ctx: null,
+  w:   0,
+  h:   0,
+
+  // tools and their parameters
+  tool:    "pencil",    // default tool
+  pencilTexture: null, 
+  brushTexture:  null, 
+  sprayTexture:  null, 
+  sprayStencil:  null, 
+  
+  color:   "#000000",
+  size:    2, 
+  opacity: 1,
+
+  // flag used to detect mousedown + mousemove for drawing
+  flag: false,
+
+  // "point" types for mouse coordinates
+  prev: { x:0, y:0 },
+  curr: { x:0, y:0 },
+
+
+  //
+  //
+  // INITIALISE AND SETTERS /////////////
+  canvasInit: function(canvasObject) {
+    this.can = canvasObject; 
+    this.ctx = this.can.getContext('2d');
+    this.w = this.can.width;
+    this.h = this.can.height;
+    this.ctx.fillStyle = '#fff';
+    this.ctx.fillRect(0, 0, this.w, this.h);
+  },
+
+  setTool: function(toolName) {
+    this.tool = toolName;
+    console.log("chose " + this.tool + " tool.");
+  },
+
+  setPencil: function(userSize, textureUrl) {
+    this.size = userSize;
+    this.pencilTexture = new Image();
+    this.pencilTexture.src = textureUrl;
+    this.pencilTexture.setAttribute('crossOrigin', 'anonymous');
+  },
+  setBrush: function(userSize, textureUrl) {
+    this.size = userSize;
+    this.brushTexture = new Image();
+    this.brushTexture.src = textureUrl;
+    this.brushTexture.setAttribute('crossOrigin', 'anonymous');
+  },
+  setSpray: function(userSize, textureUrl, stencilUrl) {
+    this.size = userSize;
+    this.sprayTexture = new Image();
+    this.sprayTexture.src = textureUrl;
+    this.sprayTexture.setAttribute('crossOrigin', 'anonymous');
+    this.sprayStencil = new Image();
+    this.sprayStencil.src = stencilUrl;
+    this.sprayStencil.setAttribute('crossOrigin', 'anonymous');
+  },
+
+  setColor: function(c) { this.color = c; },
+  setSize:  function(s) { this.size  = s; },
+  setFlag:  function(f) { this.flag  = f; },
+
+  //
+  //
+  // MOUSE EVENTS ////////////////////////
+  refreshCoordinates: function(e) {
+    this.prev.x = this.curr.x;
+    this.prev.y = this.curr.y;
+    this.curr.x = e.clientX - this.can.offsetLeft + document.body.scrollLeft;
+    this.curr.y = e.clientY - this.can.offsetTop  + document.body.scrollTop;
+  },
+
+
+  //
+  //
+  // TOOLS BEHAVIOUR //////////////
+
+  //
+  // Eyedropper tool
+  chooseColor: function(colorPicker) {
+    // Get the pixel's color
+    var p   = this.ctx.getImageData(this.curr.x, this.curr.y, 1, 1).data;
+    var hex = Color.rgbToHex(p[0], p[1], p[2]);
+    // Set the color picker to that color
+    colorPicker.spectrum("set", hex);
+    this.setColor(hex);
+  },
+
+  //
+  // Select tool
   // adds a pseudo div element (which is the select area)
   // to the div element underneath the canvas 
-  selectStartX:  0, 
-  selectStartY:  0,
-  selectarea:    null,
-  canvasWrapper: null,
-  setSelect: function(canvasWrapper) {
-    this.canvasWrapper = canvasWrapper;
-  },
-  // Drawing the area
-  onMouseMove: function() {
-    var x  = Mouse.curr.x,      y  = Mouse.curr.y,
+  selectStartX: 0, 
+  selectStartY: 0,
+  selectarea: null,
+
+  selectDrawPath: function() {
+    var x  = this.curr.x,       y = this.curr.y,
         x0 = this.selectStartX, y0 = this.selectStartY;
     if (this.selectarea !== null) {
       this.selectarea.style.width  = Math.abs(x - x0) + 'px' ;
@@ -115,13 +207,13 @@ var Select = {
       this.selectarea.style.top    = (y - y0 < 0) ? y + 'px' : y0 + 'px';
     }
   },
-  onMouseDown: function(wrapperObject) {
-    var x = Mouse.curr.x, y = Mouse.curr.y;
+  selectStartEndPath: function(wrapperObject) {
+    var x = this.curr.x, y = this.curr.y;
 
     if(this.selectarea != null) {
       console.log("end selection at (" + x + ", " + y + ")"); 
       this.selectarea = null;
-      Editor.can.style.cursor = "default";
+      this.can.style.cursor = "default";
     }
     else {
       // initialise selection
@@ -133,236 +225,55 @@ var Select = {
       this.selectarea.style.left = x + 'px'; 
       this.selectarea.style.top = y + 'px';
 
+      console.log(wrapperObject);
       wrapperObject.appendChild(this.selectarea);
-      Editor.can.style.cursor = "crosshair";
-    }
-  }
-}
-
-var Pencil = {
-  texture: null,
-  size:    2,
-  opacity: 1,
-  setPencil: function(textureUrl, userSize, userOpacity) {
-    this.size = userSize;
-    this.texture = new Image();
-    this.texture.src = textureUrl;
-    this.texture.setAttribute('crossOrigin', 'anonymous');
-    this.opacity = userOpacity;
-  },
-  // Drawing functions
-  onMouseDown: function() {
-    if(this.texture == null) {
-      Editor.drawDot(this.size, this.opacity);
-    }
-    else
-      Editor.drawDotWithTexture(this.texture, this.size, this.opacity);
-  },
-  onMouseMove: function() {
-    if(this.texture == null) {
-      Editor.drawLine(this.size, this.opacity);
-    }
-    else
-      Editor.drawLineWithTexture(this.texture, this.size, this.opacity);
-  },
-}
-
-var Brush = {
-  texture: null,
-  sizeX:   10,
-  sizeY:   10,
-  opacity: 1, 
-  setBrush: function(textureUrl, userSize, userOpacity) {
-    this.texture = new Image();
-    this.texture.src = textureUrl;
-    this.texture.setAttribute('crossOrigin', 'anonymous');
-    this.sizeX = userSize;
-    this.sizeY = userSize; // TODO: proportional size
-    this.opacity = userOpacity;
-  },
-  // Drawing functions
-  onMouseDown: function() {
-    Editor.drawDotWithTexture (this.texture, this.sizeX, this.sizeY, this.opacity);
-  },
-  onMouseMove: function() {
-    Editor.drawLineWithTexture(this.texture, this.sizeX, this.sizeY, this.opacity);
-  }
-}
-
-var Spray = {
-  texture: null,
-  stencil: null,
-  size   : 100,
-  setSpray: function(userSize, textureUrl, stencilUrl) {
-    this.size = userSize;
-    this.texture = new Image();
-    this.texture.src = textureUrl;
-    this.texture.setAttribute('crossOrigin', 'anonymous');
-    this.stencil = new Image();
-    this.stencil.src = stencilUrl;
-    this.stencil.setAttribute('crossOrigin', 'anonymous');
-  },
-  // Drawing functions
-  onMouseDown: function() {
-    // Editor.DrawDotWithTexture(texture, sizeX, sizeY);
-  },
-  onMouseMove: function() {
-    // Editor.DrawLineWithTexture(texture, sizeX, sizeY);
-  }
-}
-
-var Shape = { done: 0 } //TODO 
-
-var Eyedrop = {
-  colorPicker: null,
-  setEyedrop: function(colorPicker) {
-    this.colorPicker = colorPicker;
-  },
-  onMouseDown: function() {
-    // Get the pixel's color
-    var p   = Editor.ctx.getImageData(Mouse.curr.x, Mouse.curr.y, 1, 1).data;
-    var hex = Color.rgbToHex(p[0], p[1], p[2]);
-    // Set the color picker to that color
-    this.colorPicker.spectrum("set", hex);
-    Editor.setColor(hex);
-  },
-  onMouseMove: function() {
-    // nothing to be done here :)
-  }
-}
-
-
-// Mouse object
-var Mouse = {   
-  // "point" types for mouse coordinates
-  prev: { x:0, y:0 },
-  curr: { x:0, y:0 },
-  refreshCoordinates: function(e) {
-    this.prev.x = this.curr.x;
-    this.prev.y = this.curr.y;
-    this.curr.x = e.clientX - Editor.can.offsetLeft + document.body.scrollLeft;
-    this.curr.y = e.clientY - Editor.can.offsetTop  + document.body.scrollTop;
-  }
-}
-
-// Object with all the editor data
-var Editor = {
-  // canvas
-  can: null,
-  ctx: null,
-  w:   0,
-  h:   0,
-
-  // tools and color
-  tool:      "pencil",    
-  color:     "#000000",
-
-  // flag used to detect mousedown + mousemove for drawing
-  flag: false,
-
-  // Initialise
-  canvasInit: function(canvasObject) {
-    this.can = canvasObject;
-    this.ctx = this.can.getContext('2d');
-    this.w = this.can.width;
-    this.h = this.can.height;
-    this.ctx.fillStyle = '#fff';
-    this.ctx.fillRect(0, 0, this.w, this.h);
-  },
-
-  // setters
-  setTool: function(toolName) {
-    this.tool = toolName;
-    console.log("chose " + this.tool + " tool.");
-  },
-  setColor: function(c) { this.color = c; },
-  setFlag:  function(f) { this.flag  = f; },
-
-  // handle mouse events
-  handleDown: function(e) {
-    Mouse.refreshCoordinates(e);
-
-    if(this.tool == "select") {  
-      Select.onMouseDown();
-    }
-    this.setFlag(true);
-    if(this.flag) {  // start drawing once the draw flag is set
-      if(this.tool == "pencil") {
-        Pencil.onMouseDown();
-      }
-      if(this.tool == "brush") {
-        Brush.onMouseDown();
-      }
-      if(this.tool == "spray") {
-        Spray.onMouseDown();
-      }
-      if(this.tool == "shape") {
-        Shape.onMouseDown();
-      }
-    }
-    if(this.tool == "eyedrop") {
-      Eyedrop.onMouseDown();
+      this.can.style.cursor = "crosshair";
     }
   },
-  handleMove: function(e) {
-    Mouse.refreshCoordinates(e);
 
-    if(this.tool == "select") {  
-      Select.onMouseMove();
-    }
-    if(this.flag) {  // keep drawing on mouse move as long as mouse is down 
-      if(this.tool == "pencil") {
-        Pencil.onMouseMove();
-      }
-      if(this.tool == "brush") {
-        Brush.onMouseMove();
-      }
-      if(this.tool == "spray") {
-        Spray.onMouseMove();
-      }
-      if(this.tool == "shape") {
-        Shape.onMouseMove();
-      }
-    }
-  },
-  handleUp: function(e) {
-    this.setFlag(false);  // mouse up, stop drawing
-  },
 
-  // Drawing helpers
-  drawDot: function(size, opacity) {  // TODO: opacity
+  //
+  // pencil
+  drawDot: function() {
     this.ctx.beginPath();
     this.ctx.fillStyle = this.color;
-    this.ctx.fillRect(Mouse.curr.x, Mouse.curr.y, size, size);
+    this.ctx.fillRect(this.curr.x, this.curr.y, this.size, this.size);
     this.ctx.closePath();
   },
-  drawLine: function(size, opacity) { // TODO: opacity
+  drawLine: function() {
     this.ctx.beginPath();
-    this.ctx.moveTo(Mouse.prev.x, Mouse.prev.y);
-    this.ctx.lineTo(Mouse.curr.x, Mouse.curr.y);
-    this.ctx.lineWidth   = size;
+
+    this.ctx.moveTo(this.prev.x, this.prev.y);
+    this.ctx.lineTo(this.curr.x, this.curr.y);
+    this.ctx.lineWidth   = this.size;
     this.ctx.strokeStyle = this.color;
+
     this.ctx.stroke();
     this.ctx.closePath();
   },
-  drawDotWithTexture: function(texture, sizeX, sizeY, opacity) { // TODO: opacity
-    this.ctx.drawImage(texture, Mouse.curr.x - sizeX/2, Mouse.curr.y - sizeY/2);
+
+ 
+  //
+  // brush
+  drawSingleStroke: function() {
+    this.ctx.drawImage(this.brushTexture, this.curr.x - this.brushTexture.height/2, this.curr.y - this.brushTexture.height/2);
   },
-  drawLineWithTexture: function(texture, sizeX, sizeY, opacity) {
-    var halfH = sizeX/2;
-    var halfW = sizeY/2;
-    var dist  = Dist.distance(Mouse.prev, Mouse.curr);
-    var alpha = Dist.angle   (Mouse.prev, Mouse.curr);
+  drawStroke: function() {
+    var halfH = this.brushTexture.height/2;
+    var halfW = this.brushTexture.width/2;
+    var dist  = Dist.distance(this.prev, this.curr);
+    var alpha = Dist.angle(this.prev, this.curr);
+
     var x, y;
+
     for(var i = 0; (i <= dist || i == 0); i++) {
-      x = Mouse.prev.x + (Math.sin(alpha) * i) - halfW;
-      y = Mouse.prev.y + (Math.cos(alpha) * i) - halfH;
-      this.ctx.drawImage(texture, x, y);
+      x = this.prev.x + (Math.sin(alpha) * i) - halfW;
+      y = this.prev.y + (Math.cos(alpha) * i) - halfH;
+      this.ctx.drawImage(this.brushTexture, x, y);
     }
   }
 
 }
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -371,6 +282,7 @@ if(Meteor.isClient) {
   // Brick parameters
   var row, col;
 
+
   // Canvas 
   Template.canvas.onRendered(function () {
     // prepare the canvas
@@ -378,13 +290,9 @@ if(Meteor.isClient) {
     Editor.canvasInit(canvas);
     loadImage(Editor.ctx);
  
-    // init tools/default
-    Select.setSelect(document.getElementById("canvas-wrapper"));
-    Pencil.setPencil(null, 2, 1);
-    Brush.setBrush('http://i.imgur.com/zA1il03.png', 10, 1);
-
-    // TODO: can't colorprick from brush strokes!!!
-    console.log(Brush.texture.getAttribute('crossOrigin')); 
+    // init tools
+    Editor.setPencil(2, null);
+    Editor.setBrush(2, 'http://i.imgur.com/zA1il03.png');
 
     // init the color picker
     $("#colorpicker").spectrum({
@@ -400,8 +308,6 @@ if(Meteor.isClient) {
         Editor.setColor(c.toHexString());
       },
     });
-
-    Eyedrop.setEyedrop($("#colorpicker"));
   });
 
 
@@ -430,16 +336,16 @@ if(Meteor.isClient) {
 
     // Mouse events for drawing
     'mousedown #canvas': function(e) {
-      Editor.handleDown(e);
+      handleDown(e);
     },
     'mouseup #canvas': function(e) {
-      Editor.handleUp(e);
+      handleUp(e);
     },
     'mousemove #canvas': function(e) {
-      Editor.handleMove(e);
+      handleMove(e);
     },
     'mouseout #canvas': function(e) {
-      Editor.handleUp(e);
+      handleUp(e);
     },
 
     // Event to save canvas content
@@ -447,6 +353,57 @@ if(Meteor.isClient) {
       saveImage(e, row, col);
     }
    });
+
+  handleDown = function(e) {
+    Editor.refreshCoordinates(e);
+
+    if(Editor.tool == "select") {  
+      Editor.selectStartEndPath(document.getElementById("canvas-wrapper")); 
+    }
+    Editor.setFlag(true);  // on mouse down, start drawing
+    if(Editor.flag) {
+      if(Editor.tool == "pencil") {
+        Editor.drawDot();
+      }
+      if(Editor.tool == "brush") {
+        Editor.drawSingleStroke();
+      }
+      if(Editor.tool == "spray") {
+        Editor.drawSingleSpray();
+      }
+      if(Editor.tool == "shape") {
+        Editor.shapeStartPath();
+      }
+    }
+    if(Editor.tool == "eyedrop") {
+      Editor.chooseColor($("#colorpicker"));
+    }
+  }
+  handleMove = function(e) {
+    Editor.refreshCoordinates(e);
+
+    if(Editor.tool == "select") {
+        Editor.selectDrawPath();
+    }
+    if(Editor.flag) {   // keep drawing on mouse move as long as mouse is down
+      if(Editor.tool == "pencil") {
+        Editor.drawLine();
+      }
+      if(Editor.tool == "brush") {
+        Editor.drawStroke();
+      }
+      if(Editor.tool == "spray") {
+        Editor.drawSpray();
+      }
+      if(Editor.tool == "shape") {
+        Editor.shapeDrawPath();
+      }
+    }
+  }
+  handleUp = function(e) {
+    Editor.setFlag(false);  // mouse up, stop drawing
+  }
+
 
 }
 

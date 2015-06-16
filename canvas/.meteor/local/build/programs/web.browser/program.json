@@ -233,17 +233,6 @@
       "hash": "dd8bac56f8fd3666d433d2285ae01e52597cc51a"
     },
     {
-      "path": "packages/streams.js",
-      "where": "client",
-      "type": "js",
-      "cacheable": true,
-      "url": "/packages/streams.js?d9fa7ce792ed634ff135d053e533127e8fd1c587",
-      "sourceMap": "packages/streams.js.map",
-      "sourceMapUrl": "/packages/d9fa7ce792ed634ff135d053e533127e8fd1c587.map",
-      "size": 9243,
-      "hash": "d9fa7ce792ed634ff135d053e533127e8fd1c587"
-    },
-    {
       "path": "packages/deps.js",
       "where": "client",
       "type": "js",
@@ -431,6 +420,28 @@
       "hash": "b6d1cfe674b75903f7d35eab4d29d804af1bb7b1"
     },
     {
+      "path": "packages/gabrielengel_konecty-magnific-popup.js",
+      "where": "client",
+      "type": "js",
+      "cacheable": true,
+      "url": "/packages/gabrielengel_konecty-magnific-popup.js?db3bee3daf30f582598d81a6bfadc8faccd2a8c4",
+      "sourceMap": "packages/gabrielengel_konecty-magnific-popup.js.map",
+      "sourceMapUrl": "/packages/db3bee3daf30f582598d81a6bfadc8faccd2a8c4.map",
+      "size": 253242,
+      "hash": "db3bee3daf30f582598d81a6bfadc8faccd2a8c4"
+    },
+    {
+      "path": "packages/ryanswapp_spectrum-colorpicker.js",
+      "where": "client",
+      "type": "js",
+      "cacheable": true,
+      "url": "/packages/ryanswapp_spectrum-colorpicker.js?aa783b7b348169f8d1630d43849b9473e09dc287",
+      "sourceMap": "packages/ryanswapp_spectrum-colorpicker.js.map",
+      "sourceMapUrl": "/packages/aa783b7b348169f8d1630d43849b9473e09dc287.map",
+      "size": 295856,
+      "hash": "aa783b7b348169f8d1630d43849b9473e09dc287"
+    },
+    {
       "path": "packages/webapp.js",
       "where": "client",
       "type": "js",
@@ -499,18 +510,18 @@
       "where": "client",
       "type": "js",
       "cacheable": true,
-      "url": "/client/view/template.canvas.js?d9ed1b0bfe684d5519a73b9528909bbc7adaf145",
-      "size": 331,
-      "hash": "d9ed1b0bfe684d5519a73b9528909bbc7adaf145"
+      "url": "/client/view/template.canvas.js?3c8f17edb6084d5718af943ef487e22c34200c7a",
+      "size": 748,
+      "hash": "3c8f17edb6084d5718af943ef487e22c34200c7a"
     },
     {
       "path": "app/client/view/template.wall.js",
       "where": "client",
       "type": "js",
       "cacheable": true,
-      "url": "/client/view/template.wall.js?a754905ff46e32b590c3d52497938cb6270651f3",
-      "size": 1677,
-      "hash": "a754905ff46e32b590c3d52497938cb6270651f3"
+      "url": "/client/view/template.wall.js?af70eba55b456d8644f2d94111e1829f3a5cc548",
+      "size": 3088,
+      "hash": "af70eba55b456d8644f2d94111e1829f3a5cc548"
     },
     {
       "path": "app/client/template.home.js",
@@ -526,38 +537,38 @@
       "where": "client",
       "type": "js",
       "cacheable": true,
-      "url": "/lib/canvas.js?80e99108be571922964e2e0d9bd3c921303398f9",
-      "size": 2843,
-      "hash": "80e99108be571922964e2e0d9bd3c921303398f9"
+      "url": "/lib/canvas.js?9fc948c202374c56600e2420b962e146bec65bf0",
+      "size": 12998,
+      "hash": "9fc948c202374c56600e2420b962e146bec65bf0"
     },
     {
       "path": "app/lib/wall.js",
       "where": "client",
       "type": "js",
       "cacheable": true,
-      "url": "/lib/wall.js?08100a093eb122de9c9c913bde01883aff071209",
-      "size": 1579,
-      "hash": "08100a093eb122de9c9c913bde01883aff071209"
+      "url": "/lib/wall.js?5bc51980136776ad8b2a8a4d61b4c58b7d95c95c",
+      "size": 3832,
+      "hash": "5bc51980136776ad8b2a8a4d61b4c58b7d95c95c"
     },
     {
       "path": "app/client/routes.js",
       "where": "client",
       "type": "js",
       "cacheable": true,
-      "url": "/client/routes.js?6cf713b76778cd5d1fa563a3fc0a425f17ea3a44",
-      "size": 272,
-      "hash": "6cf713b76778cd5d1fa563a3fc0a425f17ea3a44"
+      "url": "/client/routes.js?806bb70344ed43b6c5d0bec12e9d6f739ae764c1",
+      "size": 516,
+      "hash": "806bb70344ed43b6c5d0bec12e9d6f739ae764c1"
     },
     {
-      "path": "0400a742b501f8f469c5028bdcdcef5ef9e60be4.css",
+      "path": "e52722735f0b53271660de14832e43aeedcd756a.css",
       "where": "client",
       "type": "css",
       "cacheable": true,
-      "url": "/0400a742b501f8f469c5028bdcdcef5ef9e60be4.css",
-      "sourceMap": "0400a742b501f8f469c5028bdcdcef5ef9e60be4.css.map",
-      "sourceMapUrl": "/0400a742b501f8f469c5028bdcdcef5ef9e60be4.map",
-      "size": 271,
-      "hash": "0400a742b501f8f469c5028bdcdcef5ef9e60be4"
+      "url": "/e52722735f0b53271660de14832e43aeedcd756a.css",
+      "sourceMap": "e52722735f0b53271660de14832e43aeedcd756a.css.map",
+      "sourceMapUrl": "/e52722735f0b53271660de14832e43aeedcd756a.map",
+      "size": 27825,
+      "hash": "e52722735f0b53271660de14832e43aeedcd756a"
     }
   ]
 }

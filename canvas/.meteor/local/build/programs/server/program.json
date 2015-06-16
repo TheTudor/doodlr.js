@@ -202,11 +202,6 @@
       "path": "packages/meteor-platform.js"
     },
     {
-      "sourceMap": "packages/streams.js.map",
-      "sourceMapRoot": "packages",
-      "path": "packages/streams.js"
-    },
-    {
       "sourceMap": "packages/iron_core.js.map",
       "sourceMapRoot": "packages",
       "path": "packages/iron_core.js"
@@ -265,6 +260,16 @@
       "sourceMap": "packages/timmyg13_parse-sdk.js.map",
       "sourceMapRoot": "packages",
       "path": "packages/timmyg13_parse-sdk.js"
+    },
+    {
+      "sourceMap": "packages/gabrielengel_konecty-magnific-popup.js.map",
+      "sourceMapRoot": "packages",
+      "path": "packages/gabrielengel_konecty-magnific-popup.js"
+    },
+    {
+      "sourceMap": "packages/ryanswapp_spectrum-colorpicker.js.map",
+      "sourceMapRoot": "packages",
+      "path": "packages/ryanswapp_spectrum-colorpicker.js"
     },
     {
       "sourceMap": "packages/session.js.map",
