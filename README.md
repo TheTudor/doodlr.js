@@ -1,11 +1,15 @@
+To install deps:
+
+    meteor add iron:router lepozepo:streams timmyg13:parse-sdk
+
 To run:
-  $ cd canvas
-  $ meteor
 
-Home at http://localhost:3000
-Canvas at http://localhost:3000/canvas
+    meteor
 
-Dependencies:
-  iron:router 
-  streams
-  timmyg13:parse-sdk
+Check it out at:
+
+http://localhost:3000
+
+Individual canvases are found at:
+
+http://localhost:3000/canvas/<canvas-id>
