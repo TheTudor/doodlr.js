@@ -8,7 +8,12 @@ var Color = {
   },
 
   hexToRgb : function(hex) {
-// TODO   return 0; 
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
   },
 
   rgbToHsl : function(r, g, b) {
@@ -103,14 +108,18 @@ var Editor = {
 
   // tools and their parameters
   tool:    "pencil",    // default tool
+
   pencilTexture: null, 
-  brushTexture:  null, 
+  pencilSize:    2,
+  brushTexture:  null,
+  brushSize:     10, 
+  brushOpacity:  0.5,
   sprayTexture:  null, 
-  sprayStencil:  null, 
+  sprayStencil:  null,
+  spraySize:     100,
+  sprayOpacity:  0.5, 
   
   color:   "#000000",
-  size:    2, 
-  opacity: 1,
 
   // flag used to detect mousedown + mousemove for drawing
   flag: false,
@@ -137,19 +146,22 @@ var Editor = {
     console.log("chose " + this.tool + " tool.");
   },
 
-  setPencil: function(userSize, textureUrl) {
-    this.size = userSize;
+  setPencilTexture: function(textureUrl) {
     this.pencilTexture = new Image();
     this.pencilTexture.src = textureUrl;
     this.pencilTexture.setAttribute('crossOrigin', 'anonymous');
   },
-  setBrush: function(userSize, textureUrl) {
-    this.size = userSize;
+  setPencilSize: function(pencilSize) {
+    this.pencilSize = pencilSize;
+  },
+  setBrush: function(brushSize, textureUrl, brushOpacity) {
+    this.brushSize = brushSize;
     this.brushTexture = new Image();
     this.brushTexture.src = textureUrl;
     this.brushTexture.setAttribute('crossOrigin', 'anonymous');
+    this.brushOpacity = brushOpacity;
   },
-  setSpray: function(userSize, textureUrl, stencilUrl) {
+  setSpray: function(userSize, textureUrl, stencilUrl, sprayOpacity) {
     this.size = userSize;
     this.sprayTexture = new Image();
     this.sprayTexture.src = textureUrl;
@@ -157,6 +169,7 @@ var Editor = {
     this.sprayStencil = new Image();
     this.sprayStencil.src = stencilUrl;
     this.sprayStencil.setAttribute('crossOrigin', 'anonymous');
+    this.sprayOpacity = sprayOpacity;
   },
 
   setColor: function(c) { this.color = c; },
@@ -235,28 +248,20 @@ var Editor = {
   //
   // pencil
   drawDot: function() {
-    this.ctx.beginPath();
-    this.ctx.fillStyle = this.color;
-    this.ctx.fillRect(this.curr.x, this.curr.y, this.size, this.size);
-    this.ctx.closePath();
+    this.drawTextureDot(this.pencilSize, this.pencilTexture, 1, this.color); 
   },
   drawLine: function() {
-    this.ctx.beginPath();
-
-    this.ctx.moveTo(this.prev.x, this.prev.y);
-    this.ctx.lineTo(this.curr.x, this.curr.y);
-    this.ctx.lineWidth   = this.size;
-    this.ctx.strokeStyle = this.color;
-
-    this.ctx.stroke();
-    this.ctx.closePath();
+    this.drawTextureLine(this.pencilSize, this.pencilTexture, 1, this.color); 
   },
 
  
   //
   // brush
   drawSingleStroke: function() {
+    this.ctx.save();
+    this.ctx.globalAlpha = this.brushOpacity;
     this.ctx.drawImage(this.brushTexture, this.curr.x - this.brushTexture.height/2, this.curr.y - this.brushTexture.height/2);
+    this.ctx.restore();
   },
   drawStroke: function() {
     var halfH = this.brushTexture.height/2;
@@ -271,8 +276,57 @@ var Editor = {
       y = this.prev.y + (Math.cos(alpha) * i) - halfH;
       this.ctx.drawImage(this.brushTexture, x, y);
     }
-  }
+  },
 
+  // drawing helper
+  drawTextureDot: function(size, texture, opacity, color) {
+    // update the brush with user parameters
+    var brush = this.setTexture(size, texture, opacity, color);
+ 
+    this.ctx.save();
+    this.ctx.globalAlpha = opacity;
+    this.ctx.drawImage(brush, this.curr.x - brush.width/2, this.curr.y - brush.height/2);
+    this.ctx.restore();
+  },
+  drawTextureLine: function(size, texture, opacity, color) {
+    // update the brush with user parameters
+    var brush = this.setTexture(size, texture, opacity, color);
+
+    var dist  = Dist.distance(this.prev, this.curr);
+    var alpha = Dist.angle(this.prev, this.curr);
+    var x, y;
+    for(var i = 0; (i <= dist || i == 0); i++) {
+      x = this.prev.x + (Math.sin(alpha) * i) - brush.width/2;
+      y = this.prev.y + (Math.cos(alpha) * i) - brush.height/2;
+      this.ctx.save();
+      this.ctx.globalAlpha = opacity;
+      this.ctx.drawImage(brush, x, y);
+      this.ctx.restore();
+    }
+  },
+  setTexture: function(size, texture, opacity, color) {
+    // color the brush 
+    var rgb = Color.hexToRgb(color);
+    // create a ghost canvas which is not added to the page, for manipulating the image
+    var bcanvas = document.createElement('canvas');
+    var bctx    = bcanvas.getContext('2d');
+    bcanvas.width = texture.width, bcanvas.height = texture.height;
+    texture.setAttribute('crossOrigin', 'anonymous');
+    bctx.drawImage(texture, 0, 0);
+    var imgdata = bctx.getImageData(0, 0, texture.width, texture.height);
+    var rgba = imgdata.data;
+    // change colors
+    for (var px = 0; px < rgba.length; px += 4) { 
+      rgba[px  ] = rgb.r;
+      rgba[px+1] = rgb.g;
+      rgba[px+2] = rgb.b;
+    }
+    console.log(rgba);
+    bctx.putImageData(imgdata,0,0);
+    bctx.scale(2,2); // TODO: make this work
+    return bcanvas;  
+  }
+  
 }
 
 
@@ -291,8 +345,9 @@ if(Meteor.isClient) {
     loadImage(Editor.ctx);
  
     // init tools
-    Editor.setPencil(2, null);
-    Editor.setBrush(2, 'http://i.imgur.com/zA1il03.png');
+    Editor.setPencilSize(2);
+    Editor.setPencilTexture('/pencil0.png');
+    Editor.setBrush(2, '/brush1.png', 0.5);
 
     // init the color picker
     $("#colorpicker").spectrum({
@@ -354,6 +409,79 @@ if(Meteor.isClient) {
     }
    });
 
+  // array of pencil textures
+  var pencilTextures = [ '/pencil0.png', '/pencil1.png', '/pencil2.png', '/pencil3.png' ];
+
+  // load the textures into their elements
+  Template.PencilProperties.helpers({
+    pencilTextures: function() {
+      var textures = [];
+      for(var i = 0; i < pencilTextures.length; i++) {
+        var id = 'pencil' + i;
+        textures.push({ id: id, image: pencilTextures[i] });
+      }
+      return textures;
+    }
+  });
+
+  // pencil properties: texture, size, opacity
+  Template.PencilProperties.events({
+    // pencil change texture
+    'click #pencil0': function(e, template) {
+      var allTextures = template.findAll('.pencilTexture');
+      var textureImg  = template.find('#pencil0');
+      updateTexture(allTextures, textureImg);
+    },
+    'click #pencil1': function(e, template) {
+      var allTextures = template.findAll('.pencilTexture');
+      var textureImg  = template.find('#pencil1');
+      updateTexture(allTextures, textureImg);
+    },
+    'click #pencil2': function(e, template) {
+      var allTextures = template.findAll('.pencilTexture');
+      var textureImg  = template.find('#pencil2');
+      updateTexture(allTextures, textureImg);
+    },
+    'click #pencil3': function(e, template) {
+      var allTextures = template.findAll('.pencilTexture');
+      var textureImg  = template.find('#pencil3');
+      updateTexture(allTextures, textureImg);
+    },
+    // pencil change width
+    'change #pencil-width': function(e, template) {
+      var size = template.find('#pencil-width').value;
+      var textField = template.find('#pencil-width-field');
+      textField.value = size;
+      Editor.setPencilSize(size);
+      console.log("set pencil size " + size);
+    },
+    'change #pencil-width-field': function(e, template) {
+      var slider = template.find('#pencil-width');
+      var size = template.find('#pencil-width-field').value;
+      if (size < 1 || size > 4) {
+        console.log("invalid pencil size");  // TODO: add some visual error
+      }
+      else {
+        slider.value = size;
+        Editor.setPencilSize(size);
+        console.log("set pencil size " + size);
+      }
+    },
+    
+  });
+  updateTexture = function(all, selected) {
+    all.forEach(function(elem) {
+        elem.style.border = "0";
+      }
+    );
+    selected.style.border = "1.5px solid yellow";
+    Editor.setPencilTexture(selected.src);
+    console.log("set pencil texture " + selected.src);
+  }
+
+
+  //
+  // Mouse event handlers
   handleDown = function(e) {
     Editor.refreshCoordinates(e);
 

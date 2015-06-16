@@ -50,6 +50,61 @@
 }
 
 
+/* tool properties */
+.prop {
+  border: 1px solid #888;
+  /*display: none;*/
+  margin: 5px;
+  padding: 5px;
+  width: 262px;
+}
+.texture, .width, .opacity {
+  display: block;
+}
+.texture > div {
+  background-color: #ffffff;
+  background-size: 50px 50px;
+  display: inline-block;
+  height: 50px;
+  width: 50px;
+}
+.texture > div > img {
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+.width > input[type="text"], .opacity > input[type="text"] {
+  margin-top: -10px;
+  width: 40px !important;
+}
+.width > input[type="range"], .opacity > input[type="range"] {
+  margin-top: -10px;
+  width: 200px !important;
+}
+
+
+/* brush tool textures */
+#brush1 {
+  background-image: url('http://i.imgur.com/zA1il03.png');
+  background-size: 50px 50px;
+}
+#brush2 {
+  background-image: url('http://i.imgur.com/V5hEec6.png');
+  background-size: 50px 50px;
+}
+#brush3 {
+  background-image: url('http://i.imgur.com/qblhxtE.png');
+  background-size: 50px 50px;
+}
+#brush4 {
+  background-image: url('http://i.imgur.com/qEetlHY.png');
+  background-size: 50px 50px;
+}
+#brush5 {
+  background-image: url('http://i.imgur.com/BA8mCEO.png');
+  background-size: 50px 50px;
+}
+
+
 /* selection area in canvas */
 .selectarea {
   border: 1px dashed #666;

@@ -16,6 +16,52 @@
          meteor add ryanswapp:spectrum-colorpicker -->
     <input type="text" id="colorpicker">
   </div>
- 
+
+  {{> PencilProperties }}
+  {{> BrushProperties }}
+
   <button class="save-button">Save</button>
 </template>
+
+<template name="PencilProperties">
+  <!-- div's for each tool's properties -->
+  <div id = "pencil-prop" class="prop">
+    <div class="texture">
+      {{#each pencilTextures}}
+        {{> PencilTextureDiv}}
+      {{/each}}
+    </div>
+    <div class="width">
+      <h3>WIDTH</h3>
+      <input id="pencil-width" type="range" value="2" min="1" max="4">
+      <input id="pencil-width-field" type="text" value="2">
+    </div>
+  </div>
+</template>
+
+<template name="PencilTextureDiv">
+  <div><img id="{{id}}" class="pencilTexture" src={{image}} height=50 width=50></div>
+</template>
+
+<template name="BrushProperties">
+  <div id = "brush-prop" class="prop">
+    <div class="texture">
+      <div id = "brush1"></div>
+      <div id = "brush2"></div>
+      <div id = "brush3"></div>
+      <div id = "brush4"></div>
+      <div id = "brush5"></div>
+    </div>
+    <div class="width">
+      <h3>WIDTH</h3>
+      <input id="brush-width" type="range" value="10" min="1" max="200">
+      <input id="brush-width-field" type="text" value="10">
+    </div>
+    <div class="opacity">
+      <h3>OPACITY</h3>
+      <input id="brush-opacity" type="range" value="100" min="0" max="100">
+      <input id="brush-opacity-field" type="text" value="1">
+    </div>
+  </div>
+</template>
+
