@@ -140,7 +140,7 @@ var Editor = {
     this.ctx.fillStyle = '#fff';
     this.ctx.fillRect(0, 0, this.w, this.h);
 
-    this.setPencilTexture("/pencil0.png");
+    this.setPencilTexture(null);
     this.setBrushTexture("/brush1.png");
   },
 
@@ -150,9 +150,13 @@ var Editor = {
   },
 
   setPencilTexture: function(textureUrl) {
-    this.pencilTexture = new Image();
-    this.pencilTexture.src = textureUrl;
-    this.pencilTexture.setAttribute('crossOrigin', 'anonymous');
+    if(textureUrl != null) {
+      this.pencilTexture = new Image();
+      this.pencilTexture.src = textureUrl;
+      this.pencilTexture.setAttribute('crossOrigin', 'anonymous');
+    }
+    else this.pencilTexture = null;
+    console.log("pencil texture updated" + textureUrl);
   },
   setPencilSize: function(pencilSize) {
     this.pencilSize = pencilSize;
@@ -254,21 +258,49 @@ var Editor = {
   //
   // pencil
   drawDot: function() {
-    this.drawTextureDot(this.pencilSize, this.pencilTexture, 1, this.color); 
+    if(this.pencilTexture == null) {
+      this.drawDefaultPencilDot(this.pencilSize, this.color);
+    }
+    else {
+      this.drawTextureDot(this.pencilSize, this.pencilTexture, 1, this.color); 
+    }
   },
   drawLine: function() {
-    this.drawTextureLine(this.pencilSize, this.pencilTexture, 0.5, this.color); 
+    if(this.pencilTexture == null) {
+      this.drawDefaultPencilLine(this.pencilSize, this.color);
+    }
+    else {
+      this.drawTextureLine(this.pencilSize, this.pencilTexture, 0.5, this.color); 
+    }
   },
 
   //
   // brush
   drawSingleStroke: function() {
-    this.drawTextureDot(this.brushSize, this.brushTexture, this.brushOpacity, this.color); 
+    this.drawTextureDot(this.brushSize, this.brushTexture, this.brushOpacity,  this.color); 
   },
   drawStroke: function() {
-    this.drawTextureLine(this.brushSize, this.brushTexture, this.brushOpacity, this.color); 
+    this.drawTextureLine(this.brushSize, this.brushTexture, this.brushOpacity, this.color); // TODO: smoothing opacity when stroking 
   },
 
+  // DRAWING HELPERS + NON-DEXTURE DRAWING
+  drawDefaultPencilDot: function(size, color) {
+    this.ctx.beginPath();
+    this.ctx.fillStyle = color;
+    this.ctx.fillRect(this.curr.x, this.curr.y, size, size);
+    this.ctx.closePath();
+  },
+  drawDefaultPencilLine: function(size, color) {
+    this.ctx.beginPath();
+
+    this.ctx.moveTo(this.prev.x, this.prev.y);
+    this.ctx.lineTo(this.curr.x, this.curr.y);
+    this.ctx.lineWidth   = size;
+    this.ctx.strokeStyle = color;
+
+    this.ctx.stroke();
+    this.ctx.closePath();
+  },
   // drawing helper
   drawTextureDot: function(size, texture, opacity, color) {
     // update the brush with user parameters
@@ -458,17 +490,17 @@ if(Meteor.isClient) {
     'click #pencil0': function(e, template) {
       var allTextures = template.findAll('.pencilTexture');
       var textureImg  = template.find('#pencil0');
-      updateTexture(allTextures, textureImg, "pencil");
+      updateTexture(allTextures, textureImg, 0, "pencil");
     },
     'click #pencil1': function(e, template) {
       var allTextures = template.findAll('.pencilTexture');
       var textureImg  = template.find('#pencil1');
-      updateTexture(allTextures, textureImg, "pencil");
+      updateTexture(allTextures, textureImg, 1, "pencil");
     },
     'click #pencil2': function(e, template) {
       var allTextures = template.findAll('.pencilTexture');
       var textureImg  = template.find('#pencil2');
-      updateTexture(allTextures, textureImg, "pencil");
+      updateTexture(allTextures, textureImg, 2, "pencil");
     },
     // pencil change width
     'change #pencil-width': function(e, template) {
@@ -498,27 +530,27 @@ if(Meteor.isClient) {
     'click #brush0': function(e, template) {
       var allTextures = template.findAll('.brushTexture');
       var textureImg  = template.find('#brush0');
-      updateTexture(allTextures, textureImg, "brush");
+      updateTexture(allTextures, textureImg, 0, "brush");
     },
     'click #brush1': function(e, template) {
       var allTextures = template.findAll('.brushTexture');
       var textureImg  = template.find('#brush1');
-      updateTexture(allTextures, textureImg, "brush");
+      updateTexture(allTextures, textureImg, 1, "brush");
     },
     'click #brush2': function(e, template) {
       var allTextures = template.findAll('.brushTexture');
       var textureImg  = template.find('#brush2');
-      updateTexture(allTextures, textureImg, "brush");
+      updateTexture(allTextures, textureImg, 2, "brush");
     },
     'click #brush3': function(e, template) {
       var allTextures = template.findAll('.brushTexture');
       var textureImg  = template.find('#brush3');
-      updateTexture(allTextures, textureImg, "brush");
+      updateTexture(allTextures, textureImg, 3, "brush");
     },
     'click #brush4': function(e, template) {
       var allTextures = template.findAll('.brushTexture');
       var textureImg  = template.find('#brush4');
-      updateTexture(allTextures, textureImg, "brush");
+      updateTexture(allTextures, textureImg, 4, "brush");
     },
     // brush change width
     'change #brush-width': function(e, template) {
@@ -562,16 +594,22 @@ if(Meteor.isClient) {
     },
   });
     
-  updateTexture = function(all, selected, tool) {
+  updateTexture = function(all, selected, i, tool) {
     all.forEach(function(elem) {
         elem.style.border = "0";
       }
     );
     selected.style.border = "1.5px solid yellow";
-    if(tool == "pencil") Editor.setPencilTexture(selected.src);
-    if(tool == "brush")  Editor.setBrushTexture(selected.src);
-    
-    console.log("set " + tool + " texture " + selected.src);
+    if(tool == "pencil") {
+      if(i == 0) {
+        console.log(i);
+        Editor.setPencilTexture(null);
+      }
+      else {
+        Editor.setPencilTexture(pencilTextures[i]);
+      }
+    }
+    if(tool == "brush")  Editor.setBrushTexture(brushTextures[i]);
   }
 
 
