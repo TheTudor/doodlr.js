@@ -286,7 +286,9 @@ var Editor = {
     var dist  = Dist.distance(this.prev, this.curr);
     var alpha = Dist.angle(this.prev, this.curr);
     var x, y;
-    for(var i = 0; (i <= dist || i == 0); i+=10) {
+
+    var frame = size > 5 ? Math.ceil(size/4) : 0.5;
+    for(var i = 0; (i <= dist || i == 0); i+=frame) {
       x = this.prev.x + (Math.sin(alpha) * i) - brush.width/2;
       y = this.prev.y + (Math.cos(alpha) * i) - brush.height/2;
       this.ctx.save();
@@ -296,27 +298,56 @@ var Editor = {
     }
   },
   setTexture: function(size, texture, opacity, color) {
-    // color the brush 
-    var rgb = Color.hexToRgb(color);
+    texture.setAttribute('crossOrigin', 'anonymous'); // for safety
+    var h = texture.height, w = texture.width;
+    var scale = size / Math.max(w, h); 
     // create a ghost canvas which is not added to the page, for manipulating the image
     var bcanvas = document.createElement('canvas');
-    var bctx    = bcanvas.getContext('2d');
-    bcanvas.width = texture.width, bcanvas.height = texture.height;
-    texture.setAttribute('crossOrigin', 'anonymous');
-    bctx.drawImage(texture, 0, 0);
-    var imgdata = bctx.getImageData(0, 0, texture.width, texture.height);
-    var rgba = imgdata.data;
+    var bctx = bcanvas.getContext('2d');
+    bcanvas.width = w * scale, bcanvas.height = h * scale;
+
+    // scale
+    bctx.drawImage(texture, 0, 0, w * scale, h * scale);
+    var imgdata = bctx.getImageData(0, 0, w * scale, h * scale);
     // change colors
+    var rgba = imgdata.data;
+    var rgb  = Color.hexToRgb(color);
     for (var px = 0; px < rgba.length; px += 4) { 
       rgba[px  ] = rgb.r;
       rgba[px+1] = rgb.g;
       rgba[px+2] = rgb.b;
     }
-    console.log(rgba);
-    bctx.putImageData(imgdata,0,0);
-    bctx.scale(2,2); // TODO: make this work
+    bctx.putImageData(imgdata, 0, 0);
     return bcanvas;  
-  }
+  },
+  // There but for the grace of god go I.
+  // http://stackoverflow.com/questions/3448347/how-to-scale-an-imagedata-in-html-canvas
+  // scaleImageData : function(c, imageData, scale) {
+  //   var scaled = c.createImageData(imageData.width * scale, imageData.height * scale);
+  // 
+  //   for(var row = 0; row < imageData.height; row++) {
+  //     for(var col = 0; col < imageData.width; col++) {
+  //       var sourcePixel = [
+  //         imageData.data[(row * imageData.width + col) * 4 + 0],
+  //         imageData.data[(row * imageData.width + col) * 4 + 1],
+  //         imageData.data[(row * imageData.width + col) * 4 + 2],
+  //         imageData.data[(row * imageData.width + col) * 4 + 3]
+  //       ];
+  //       for(var y = 0; y < scale; y++) {
+  //         var destRow = row * scale + y;
+  //         for(var x = 0; x < scale; x++) {
+  //           var destCol = col * scale + x;
+  //           for(var i = 0; i < 4; i++) {
+  //             scaled.data[(destRow * scaled.width + destCol) * 4 + i] =
+  //               sourcePixel[i];
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // 
+  //   return scaled;
+  // }
   
 }
 
@@ -396,7 +427,7 @@ if(Meteor.isClient) {
    });
 
   // arrays of pencil and brush textures
-  var pencilTextures = [ '/pencil0.png', '/pencil1.png', '/pencil2.png', '/pencil3.png' ];
+  var pencilTextures = [ '/pencil0.png', '/pencil1.png', '/pencil2.png'  ];
   var brushTextures  = [ '/brush0.png', '/brush1.png', '/brush2.png', '/brush3.png', '/brush4.png' ];
   // load pencil the textures into their elements
   Template.PencilProperties.helpers({
@@ -437,11 +468,6 @@ if(Meteor.isClient) {
     'click #pencil2': function(e, template) {
       var allTextures = template.findAll('.pencilTexture');
       var textureImg  = template.find('#pencil2');
-      updateTexture(allTextures, textureImg, "pencil");
-    },
-    'click #pencil3': function(e, template) {
-      var allTextures = template.findAll('.pencilTexture');
-      var textureImg  = template.find('#pencil3');
       updateTexture(allTextures, textureImg, "pencil");
     },
     // pencil change width
