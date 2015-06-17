@@ -1,8 +1,5 @@
 // the parse package used can be added with
 // meteor add timmyg13:parse-sdk
-Parse.initialize("9QOijSH3c8VZ4OMuXSNtcyZ9DOlNCttX9iMsv1GL", "mbIy8g11RvZG6c2hoZ9IHumiEGszjWyACcaOcsHg");
-
-if (Meteor.isClient) {
 
   //initialise popups
   Template.logInPopup.onRendered(function() {
@@ -90,7 +87,7 @@ if (Meteor.isClient) {
     'click': function(e, template) {
       var block = template.find('canvas');
       var id    = block.id;
-      window.location.href = "/canvas/" + id;
+      Router.go('/canvas/' + id);
     }
   });
 
@@ -140,4 +137,4 @@ if (Meteor.isClient) {
       });
     }
   });
-}
+

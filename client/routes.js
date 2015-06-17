@@ -1,13 +1,31 @@
-Parse.initialize("9QOijSH3c8VZ4OMuXSNtcyZ9DOlNCttX9iMsv1GL", "mbIy8g11RvZG6c2hoZ9IHumiEGszjWyACcaOcsHg");
-
 // Documentation - https://github.com/iron-meteor/iron-router/blob/devel/Guide.md
-
-Router.route('/', function () {
-  this.render('Wall');
+Router.route('/', {
+  path: '/',
+  name: 'wall.show',
+  template: 'Wall',
+  onAfterAction: function() {},
+  action: function() {
+    this.render();
+  }
 });
 
-// When going to an address of the form /canvas/:x,:y, canvas.js will lookup the brick with 
-// row = x and column = y in Parse and return the image as data for the canvas
-Router.route('/canvas/x:iy:j', function() {
-    this.render('Canvas');
+Router.route('canvas/:id', {
+  path: '/canvas/:id',   
+  name: 'show.canvas',
+  template: 'Canvas',
+  // waitOn: function() {
+  //   return [IRLibLoader.load('/client/lib/editor.js'), 
+  //           IRLibLoader.load('/client/lib/color.js')]
+  // },
+  data: function () {
+    // return VisitedBlocks.findOne({id: this.params.id});
+  },
+
+  onAfterAction: function() {
+    console.log('atMAMA');
+  },
+  action: function() {
+    Session.set("currentId", this.params.id);
+    this.render();
+    }
 });
