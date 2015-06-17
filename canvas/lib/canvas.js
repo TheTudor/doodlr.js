@@ -114,7 +114,9 @@ var Editor = {
   brushTexture:  null,
   brushSize:     100, 
   brushOpacity:  0.5,
-  
+  lineSize:      2,
+  rectSize:      2,
+ 
   color:   "#000000",
 
   // flag used to detect mousedown + mousemove for drawing
@@ -167,6 +169,12 @@ var Editor = {
   },
   setBrushOpacity: function(brushOpacity) {
     this.brushOpacity = brushOpacity;
+  },
+  setLineSize: function(lineSize) {
+    this.lineSize = lineSize;
+  },
+  setRectSize: function(rectSize) {
+    this.rectSize = rectSize;
   },
 
   setColor: function(c) { this.color = c; },
@@ -287,6 +295,16 @@ var Editor = {
     this.ctx.stroke();
     this.ctx.closePath();
   },
+
+  //
+  // shape line
+  drawShapeLine1: function() { // TODO: change names
+    this.drawShapeLineStartEnd(this.lineSize, this.color);
+  },
+  drawShapeLine2: function() { 
+    this.drawShapeLineMove(this.lineSize, this.color);
+  },
+
   // drawing helper
   drawTextureDot: function(size, texture, opacity, color) {
     // update the brush with user parameters
@@ -339,8 +357,31 @@ var Editor = {
     return bcanvas;  
   },
 
-  // Shape tool
-    // 1 - line tool
+  lines: [],
+  currentLine: 0,
+  // SHAPE HELPERS /// TODO... mate refactor this wtf...
+  drawShapeLineStartEnd: function(size, color) {
+    if(this.lines[this.currentLine] == null) {
+      var line = { start: { x: this.curr.x, y: this.curr.y },  
+                   end  : { x: 0          , y: 0           } };
+      this.lines.push(line);
+    }
+    else {
+      this.lines[this.currentLine].end = { x: this.curr.x, y: this.curr.y }; 
+      this.ctx.beginPath();
+      this.ctx.moveTo(this.lines[this.currentLine].start.x, this.lines[this.currentLine].start.y);
+      this.ctx.lineTo(this.lines[this.currentLine].end.x,   this.lines[this.currentLine].end.y);
+      this.ctx.lineWidth = size;
+      this.ctx.strokeStyle = color;
+      this.ctx.stroke();
+      console.log(this.lines[this.currentLine]);
+      this.currentLine++;
+    }
+
+  },
+  drawShapeLineMove: function(width) {
+    console.log("imma moven"); 
+  } 
 
 }
 
@@ -588,7 +629,52 @@ if(Meteor.isClient) {
       }
     },
   });
-    
+  // line properties: width 
+  Template.LineProperties.events({
+    // line change width
+    'change #line-width': function(e, template) {
+      var width = template.find('#line-width').value;
+      var textField = template.find('#line-width-field');
+      textField.value = width;
+      Editor.setLineSize(width);
+      console.log("set line width " + width);
+    },
+    'change #line-width-field': function(e, template) {
+      var slider = template.find('#line-width');
+      var width = template.find('#line-width-field').value;
+      if (width < 1 || width > 500) {
+        console.log("invalid line width");  // TODO: add some visual error
+      }
+      else {
+        Editor.setLineOpacity(width);
+        console.log("set line width " + width);
+      }
+    },
+  });
+  // rectangle properties: width 
+  Template.RectProperties.events({
+    // rectangle change width
+    'change #rect-width': function(e, template) {
+      var width = template.find('#rect-width').value;
+      var textField = template.find('rect-width-field');
+      textField.value = width;
+      Editor.setRectSize(width);
+      console.log("set rect width " + width);
+    },
+    'change #rect-width-field': function(e, template) {
+      var slider = template.find('#rect-width');
+      var width = template.find('#rect-width-field').value;
+      if (width < 1 || width > 500) {
+        console.log("invalid rect width");  // TODO: add some visual error
+      }
+      else {
+        Editor.setRectOpacity(width);
+        console.log("set rect width " + width);
+      }
+    },
+  });
+
+  // helper to update texture for brush and pencil 
   updateTexture = function(all, selected, i, tool) {
     all.forEach(function(elem) {
       elem.style.border = "0";
@@ -623,8 +709,8 @@ if(Meteor.isClient) {
       if(Editor.tool == "brush") {
         Editor.drawSingleStroke();
       }
-      if(Editor.tool == "spray") {
-        Editor.drawSingleSpray();
+      if(Editor.tool == "line") {
+        Editor.drawShapeLine1();
       }
       if(Editor.tool == "shape") {
         Editor.shapeStartPath();
@@ -640,15 +726,15 @@ if(Meteor.isClient) {
     if(Editor.tool == "select") {
         Editor.selectDrawPath();
     }
+    if(Editor.tool == "line") {
+        Editor.drawShapeLine2();
+    }
     if(Editor.flag) {   // keep drawing on mouse move as long as mouse is down
       if(Editor.tool == "pencil") {
         Editor.drawLine();
       }
       if(Editor.tool == "brush") {
         Editor.drawStroke();
-      }
-      if(Editor.tool == "spray") {
-        Editor.drawSpray();
       }
       if(Editor.tool == "shape") {
         Editor.shapeDrawPath();

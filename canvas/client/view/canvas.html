@@ -20,7 +20,7 @@
   {{> PencilProperties }}
   {{> BrushProperties }}
   {{> LineProperties }}
-  {{> RectangleProperties }}
+  {{> RectProperties }}
 
   
   <button class="save-button">Save</button>
@@ -59,7 +59,7 @@
       <input id="brush-width-field" type="text" value="100">
     </div>
     <div class="opacity">
-      <h3>OPACITY</h3>
+      <h4>OPACITY</h4>
       <input id="brush-opacity" type="range" value="50" min="0" max="100">
       <input id="brush-opacity-field" type="text" value="0.5">
     </div>
@@ -74,18 +74,18 @@
   <!-- div's for each tool's properties -->
   <div id = "line-prop" class="prop">
     <div class="width">
-      <h3>WIDTH</h3>
+      <h4>WIDTH</h4>
       <input id="line-width" type="range" value="10" min="1" max="500">
       <input id="line-width-field" type="text" value="2">
     </div>
   </div>
 </template>
 
-<template name="RectangleProperties">
+<template name="RectProperties">
   <!-- div's for each tool's properties -->
   <div id = "rect-prop" class="prop">
     <div class="width">
-      <h3>WIDTH</h3>
+      <h4>WIDTH</h4>
       <input id="rect-width" type="range" value="10" min="1" max="500">
       <input id="rect-width-field" type="text" value="2">
     </div>
