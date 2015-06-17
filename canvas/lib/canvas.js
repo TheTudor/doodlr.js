@@ -114,10 +114,6 @@ var Editor = {
   brushTexture:  null,
   brushSize:     100, 
   brushOpacity:  0.5,
-  sprayTexture:  null, 
-  sprayStencil:  null,
-  spraySize:     100,
-  sprayOpacity:  0.5, 
   
   color:   "#000000",
 
@@ -172,16 +168,6 @@ var Editor = {
   setBrushOpacity: function(brushOpacity) {
     this.brushOpacity = brushOpacity;
   },
-  setSpray: function(userSize, textureUrl, stencilUrl, sprayOpacity) {
-    this.size = userSize;
-    this.sprayTexture = new Image();
-    this.sprayTexture.src = textureUrl;
-    this.sprayTexture.setAttribute('crossOrigin', 'anonymous');
-    this.sprayStencil = new Image();
-    this.sprayStencil.src = stencilUrl;
-    this.sprayStencil.setAttribute('crossOrigin', 'anonymous');
-    this.sprayOpacity = sprayOpacity;
-  },
 
   setColor: function(c) { this.color = c; },
   setSize:  function(s) { this.size  = s; },
@@ -193,8 +179,8 @@ var Editor = {
   refreshCoordinates: function(e) {
     this.prev.x = this.curr.x;
     this.prev.y = this.curr.y;
-    this.curr.x = e.clientX - this.can.offsetLeft + document.body.scrollLeft;
-    this.curr.y = e.clientY - this.can.offsetTop  + document.body.scrollTop;
+    this.curr.x = e.clientX + document.body.scrollLeft;
+    this.curr.y = e.clientY + document.body.scrollTop;
   },
 
 
@@ -352,37 +338,11 @@ var Editor = {
     bctx.putImageData(imgdata, 0, 0);
     return bcanvas;  
   },
-  // There but for the grace of god go I.
-  // http://stackoverflow.com/questions/3448347/how-to-scale-an-imagedata-in-html-canvas
-  // scaleImageData : function(c, imageData, scale) {
-  //   var scaled = c.createImageData(imageData.width * scale, imageData.height * scale);
-  // 
-  //   for(var row = 0; row < imageData.height; row++) {
-  //     for(var col = 0; col < imageData.width; col++) {
-  //       var sourcePixel = [
-  //         imageData.data[(row * imageData.width + col) * 4 + 0],
-  //         imageData.data[(row * imageData.width + col) * 4 + 1],
-  //         imageData.data[(row * imageData.width + col) * 4 + 2],
-  //         imageData.data[(row * imageData.width + col) * 4 + 3]
-  //       ];
-  //       for(var y = 0; y < scale; y++) {
-  //         var destRow = row * scale + y;
-  //         for(var x = 0; x < scale; x++) {
-  //           var destCol = col * scale + x;
-  //           for(var i = 0; i < 4; i++) {
-  //             scaled.data[(destRow * scaled.width + destCol) * 4 + i] =
-  //               sourcePixel[i];
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // 
-  //   return scaled;
-  // }
-  
-}
 
+  // Shape tool
+    // 1 - line tool
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -419,23 +379,52 @@ if(Meteor.isClient) {
   // Events 
   Template.canvas.events({
     // Events for choosing tools
-    'click #select' : function() {
+    'click #select'    : function() {
       Editor.setTool("select");
     },
-    'click #pencil' : function() {
+    'click #pencil'    : function() {
       Editor.setTool("pencil");
     },
-    'click #brush'  : function() {
+    'click #brush'     : function() {
       Editor.setTool("brush");
     },
-    'click #spray'  : function() {
-      Editor.setTool("spray");
+    'click #line'      : function() {
+      Editor.setTool("line");
     },
-    'click #shape'  : function() {
-      Editor.setTool("shape");
+    'click #rectangle' : function() {
+      Editor.setTool("rectangle");
     },
-    'click #eyedrop': function() {
+    'click #eyedrop'   : function() {
       Editor.setTool("eyedrop");
+    },
+
+    // pop-up and down the properties for each tool, ontool
+    'dblclick #canvas': function(e, template) {
+      var all = template.findAll('.prop');
+      removeAllMenus(all); // remove all for safety
+      
+      var menu;
+      if(Editor.tool == "pencil") {
+        menu = template.find('#pencil-prop');
+      }
+      if(Editor.tool == "brush") {
+        menu = template.find('#brush-prop');
+      }
+      if(Editor.tool == "line") {
+        menu = template.find('#line-prop');
+      }
+      if(Editor.tool == "rectangle") {
+        menu = template.find('#rect-prop');
+      }
+      var popupX = Math.min(window.innerWidth  - 280, e.clientX); // TODO: menu.width not working?
+      var popupY = Math.min(window.innerHeight - 180, e.clientY);
+      menu.style.left = popupX + 'px';
+      menu.style.top = popupY + 'px';
+      menu.style.display = "block";
+    }, 
+    'click #canvas': function(e, template) {
+      var all = template.findAll('.prop');
+      removeAllMenus(all);
     },
 
     // Mouse events for drawing
@@ -457,6 +446,12 @@ if(Meteor.isClient) {
       saveImage(e, row, col);
     }
    });
+
+   removeAllMenus = function(all) {
+      all.forEach(function(elem) {
+        elem.style.display = "none";
+      });
+   } 
 
   // arrays of pencil and brush textures
   var pencilTextures = [ '/pencil0.png', '/pencil1.png', '/pencil2.png'  ];
@@ -596,9 +591,8 @@ if(Meteor.isClient) {
     
   updateTexture = function(all, selected, i, tool) {
     all.forEach(function(elem) {
-        elem.style.border = "0";
-      }
-    );
+      elem.style.border = "0";
+    });
     selected.style.border = "1.5px solid yellow";
     if(tool == "pencil") {
       if(i == 0) {
