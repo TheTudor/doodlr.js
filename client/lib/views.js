@@ -1,6 +1,6 @@
 currentCanvas = null;
 editor = null;
-var receiver;
+receiver = null;
 
 Meteor.startup(function() {
   Deps.autorun(function() {

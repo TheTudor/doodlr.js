@@ -25,6 +25,7 @@ Router.route('canvas/:id', {
     console.log('atMAMA');
   },
   action: function() {
+    console.log("ROUTER" + this.params.id);
     Session.set("currentId", this.params.id);
     this.render();
     }

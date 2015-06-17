@@ -211,11 +211,11 @@ this.Editor = function Editor(id) {
   //
   //
   // MOUSE EVENTS ////////////////////////
-  refreshCoordinates = function(e) {
+  refreshCoordinates = function(newX, newY) {
     prev.x = curr.x;
     prev.y = curr.y;
-    curr.x = e.clientX - can.offsetLeft + document.body.scrollLeft;
-    curr.y = e.clientY - can.offsetTop  + document.body.scrollTop;
+    curr.x = newX - can.offsetLeft + document.body.scrollLeft;
+    curr.y = newY - can.offsetTop  + document.body.scrollTop;
   };
 
 
@@ -287,9 +287,9 @@ this.Editor = function Editor(id) {
       drawTextureDot(pencilSize, pencilTexture, 1, color); 
     }
   };
-  drawLine = function() {
+  drawLine = function(from, to) {
     if(pencilTexture == null) {
-      drawDefaultPencilLine(pencilSize, color);
+      drawDefaultPencilLine(from, to, pencilSize, color);
     }
     else {
       drawTextureLine(pencilSize, pencilTexture, 0.5, color); 
@@ -314,11 +314,11 @@ this.Editor = function Editor(id) {
     ctx.fillRect(hereX, hereY, size, size);
     ctx.closePath();
   };
-  drawDefaultPencilLine = function(size, color) {
+  drawDefaultPencilLine = function(from, to, size, color) {
     ctx.beginPath();
 
-    ctx.moveTo(prev.x, prev.y);
-    ctx.lineTo(curr.x, curr.y);
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
     ctx.lineWidth   = size;
     ctx.strokeStyle = color;
 
@@ -462,6 +462,7 @@ this.Editor = function Editor(id) {
     console.log(editor);
     currentCanvas = this.find('#canvas');
     editor = new Editor(Session.get('currentId'));
+    // receiver = new Receiver(Session.get('currentId'));
     console.log(editor);
     // editor.canvasInit(canvas);
     console.log(editor.getCtx());
@@ -695,9 +696,11 @@ this.Editor = function Editor(id) {
     console.log(editor.getFlag()); console.log(editor.getTool());
     if(editor.getFlag()) {
       if(editor.getTool() == "pencil") {
-        console.log("MUIE");
-        editor.drawDot(e.clientX, e.clientY);
-        drawStream.emit(Session.get('currentId') + ':down-dot', e.clientX, e.clientY);
+        console.log("MUIE");('currendId');
+        editor.drawDot(editor.curr.x, editor.curr.y);
+        // COMMAND EMIT
+        console.log("at session " + Session.get('currentId'));
+        drawStream.emit(Session.get('currentId') + ':down-dot', editor.curr);
       }
       if(editor.getTool() == "brush") {
         editor.drawSingleStroke();
@@ -715,20 +718,23 @@ this.Editor = function Editor(id) {
   }
   handleMove = function(e) {
     // console.log("mouse move" + e.clientX + " " + e.clientY);
-    editor.refreshCoordinates(e);
+    editor.refreshCoordinates(e.clientX, e.clientY);
 
     if(editor.getTool() == "select") {
         editor.selectDrawPath();
     }
     if(editor.getFlag()) {   // keep drawing on mouse move as long as mouse is down
       if(editor.getTool() == "pencil") {
-        editor.drawLine();
+        editor.drawLine(editor.prev, editor.curr);
+        // COMMAND EMIT
+        drawStream.emit(Session.get('currentId') + ':move-line', 
+                          editor.prev, editor.curr);
       }
       if(editor.getTool() == "brush") {
         editor.drawStroke();
       }
       if(editor.getTool() == "spray") {
-        editor.drawSpray();
+        editor.drawSpray();  
       }
       if(editor.getTool() == "shape") {
         editor.shapeDrawPath();
