@@ -114,8 +114,8 @@ var Editor = {
   brushTexture:  null,
   brushSize:     100, 
   brushOpacity:  0.5,
-  lineSize:      2,
-  rectSize:      2,
+  lineSize:      10,
+  rectSize:      10,
  
   color:   "#000000",
 
@@ -305,6 +305,16 @@ var Editor = {
     this.drawShapeLineMove(this.lineSize, this.color);
   },
 
+  //
+  // shape line
+  drawShapeRect1: function() { // TODO: change names
+    this.drawShapeRectStartEnd(this.rectSize, this.color);
+  },
+  drawShapeRect2: function() { 
+    this.drawShapeRectMove(this.rectSize, this.color);
+  },
+
+
   // drawing helper
   drawTextureDot: function(size, texture, opacity, color) {
     // update the brush with user parameters
@@ -381,7 +391,37 @@ var Editor = {
   },
   drawShapeLineMove: function(width) {
     console.log("imma moven"); 
+  },
+
+  rects: [],
+  currentRect: 0,
+  // SHAPE HELPERS /// TODO... mate refactor this wtf...
+  drawShapeRectStartEnd: function(size, color) {
+    if(this.rects[this.currentRect] == null) {
+      var rect = { start: { x: this.curr.x, y: this.curr.y },  
+                   size : { w: 0          , h: 0           } };
+      this.rects.push(rect);
+    }
+    else {
+      var x = this.rects[this.currentRect].start.x,
+          y = this.rects[this.currentRect].start.y,
+          w = this.curr.x - x; 
+          h = this.curr.y - y;
+      this.rects[this.currentRect].size = { w: w, h: h };
+    
+      this.ctx.beginPath();
+      this.ctx.lineWidth = size;
+      this.ctx.strokeStyle = color;
+      this.ctx.strokeRect(x, y, w, h);
+      console.log(this.rects[this.currentRect]);
+      this.currentRect++;
+    }
+
+  },
+  drawShapeRectMove: function(width) {
+    console.log("imma moven"); 
   } 
+   
 
 }
 
@@ -656,7 +696,7 @@ if(Meteor.isClient) {
     // rectangle change width
     'change #rect-width': function(e, template) {
       var width = template.find('#rect-width').value;
-      var textField = template.find('rect-width-field');
+      var textField = template.find('#rect-width-field');
       textField.value = width;
       Editor.setRectSize(width);
       console.log("set rect width " + width);
@@ -712,8 +752,8 @@ if(Meteor.isClient) {
       if(Editor.tool == "line") {
         Editor.drawShapeLine1();
       }
-      if(Editor.tool == "shape") {
-        Editor.shapeStartPath();
+      if(Editor.tool == "rectangle") {
+        Editor.drawShapeRect1();
       }
     }
     if(Editor.tool == "eyedrop") {
@@ -729,15 +769,15 @@ if(Meteor.isClient) {
     if(Editor.tool == "line") {
         Editor.drawShapeLine2();
     }
+    if(Editor.tool == "rect") {
+        Editor.drawShapeRect2();
+    }
     if(Editor.flag) {   // keep drawing on mouse move as long as mouse is down
       if(Editor.tool == "pencil") {
         Editor.drawLine();
       }
       if(Editor.tool == "brush") {
         Editor.drawStroke();
-      }
-      if(Editor.tool == "shape") {
-        Editor.shapeDrawPath();
       }
     }
   }
