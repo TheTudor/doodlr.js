@@ -1,3 +1,8 @@
+/* canvas */
+#canvas {
+  cursor: crosshair;
+}
+
 /* toolbox */
 #tools {
   height: 49px;

@@ -177,7 +177,7 @@ this.Editor = function Editor(id) {
     //brushTexture = new Image();
     //brushTexture.src = textureUrl;
     //brushTexture.setAttribute('crossOrigin', 'anonymous');
-    console.log("pbrush texture updated" + brushTextureUrl);
+    console.log("brush texture updated" + brushTextureUrl);
   };
   setBrushSize = function(size) {
     brushSize = size;
@@ -257,7 +257,6 @@ this.Editor = function Editor(id) {
       selectarea.style.left = x + 'px'; 
       selectarea.style.top = y + 'px';
 
-      console.log(wrapperObject);
       wrapperObject.appendChild(selectarea);
       can.style.cursor = "crosshair";
     }
@@ -318,13 +317,13 @@ this.Editor = function Editor(id) {
   // shape line
   drawShapeLine1 = function() { 
     // >>>>
-    drawStream.emit(Session.get('currentId') + ':down-line', curr, lineSize, color);
+    drawStream.emit(Session.get('currentId') + ':down-sline', prev, curr, lineSize, color);
 
     drawShapeLineStartEnd(prev, curr, lineSize, color);
   };
   drawShapeLine2 = function() { 
     // >>>>
-    drawStream.emit(Session.get('currentId') + ':move-line', curr, lineSize, color);
+    drawStream.emit(Session.get('currentId') + ':move-sline', prev, curr, lineSize, color);
 
     this.drawShapeLineMove(prev, curr, lineSize, color);
   };
@@ -333,13 +332,13 @@ this.Editor = function Editor(id) {
   // shape rectangle
     drawShapeRect1 = function() { 
     // >>>>
-    drawStream.emit(Session.get('currentId') + ':down-rect', curr, rectSize, color);
+    drawStream.emit(Session.get('currentId') + ':down-rect', prev, curr, rectSize, color);
 
     this.drawShapeRectStartEnd(prev, curr, rectSize, color);
   };
   drawShapeRect2 = function() { 
     // >>>>
-    drawStream.emit(Session.get('currentId') + ':move-rect', curr, restSize, color);
+    drawStream.emit(Session.get('currentId') + ':move-rect', prev, curr, restSize, color);
 
     this.drawShapeRectMove(prev, curr, rectSize, color);
   };
@@ -400,12 +399,10 @@ this.Editor = function Editor(id) {
   };
   setTexture = function(size, textureUrl, opacity, color) { // helper for setting texture, TODO: move inside set__ -- optimize
     //texture.setAttribute('crossOrigin', 'anonymous');
-    console.log(textureUrl); // for safety
     var texture = new Image();
     texture.src = textureUrl;
     texture.setAttribute('crossOrigin', 'anonymous');
-    console.log(texture);
-
+    
     var h = texture.height, w = texture.width;
     var scale = size / Math.max(w, h); 
     // create a ghost canvas which is not added to the page, for manipulating the image
@@ -429,26 +426,26 @@ this.Editor = function Editor(id) {
   };
 
   // stroke line for shape line tool
-  var lines = []; // array for all lines + todo: add history canvas(bg layer)
-  var l     = 0;  // current line
+  //var lines = []; // array for all lines + todo: add history canvas(bg layer)
+  //var l     = 0;  // current line
+  var line;
   drawShapeLineStartEnd = function(prev, curr, size, color) {
-    console.log(prev);
-    console.log(curr);
-    if(lines[l] == null) {
-        var line = { start: { x: curr.x, y: curr.y },
-                     end  : { x: 0,      y: 0      }};
-        lines.push(line);
+    //if(lines[l] == null) {
+    if(line == null) {
+        line = { start: { x: curr.x, y: curr.y },
+                 end  : { x: 0,      y: 0      }};
+        //lines.push(line);
     }
     else {
-      lines[l].end = { x: curr.x, y: curr.y };
+      line.end = { x: curr.x, y: curr.y };
       ctx.beginPath();
-      ctx.moveTo(lines[l].start.x, lines[l].start.y);
-      ctx.lineTo(lines[l].end.x,   lines[l].end.y  );
+      ctx.moveTo(line.start.x, line.start.y);
+      ctx.lineTo(line.end.x,   line.end.y  );
       ctx.lineWidth = size;
       ctx.strokeStyle = color;
       ctx.stroke();
-      console.log(lines[l]);
-      l++;
+      console.log(line);
+      line = null;
     }
   }
   drawShapeLineMove = function(prev, curr, size, color) {
@@ -542,13 +539,10 @@ this.Editor = function Editor(id) {
   // Canvas 
   Template.Canvas.onRendered(function () {
     // prepare the canvas
-    console.log(editor);
     currentCanvas = this.find('#canvas');
     editor = new Editor(Session.get('currentId'));
     // receiver = new Receiver(Session.get('currentId'));
-    console.log(editor);
     // editor.canvasInit(canvas);
-    console.log(editor.getCtx());
     loadImage(editor.getCtx());
  
     // init the color picker
@@ -867,14 +861,13 @@ this.Editor = function Editor(id) {
   //
   // Mouse event handlers
   handleDown = function(e) {
-    console.log("mouse down" + e.clientX + " " + e.clientY);
     editor.refreshCoordinates(e.clientX, e.clientY);
 
     if(editor.getTool() == "select") {  
       editor.selectStartEndPath(document.getElementById("canvas-wrapper")); 
     }
     editor.setFlag(true);  // on mouse down, start drawing
-    console.log(editor.getFlag()); console.log(editor.getTool());
+
     if(editor.getFlag()) {
       if(editor.getTool() == "pencil") {
         editor.drawDot();
@@ -894,7 +887,6 @@ this.Editor = function Editor(id) {
     }
   }
   handleMove = function(e) {
-    // console.log("mouse move" + e.clientX + " " + e.clientY);
     editor.refreshCoordinates(e.clientX, e.clientY);
 
     if(editor.getTool() == "select") {
