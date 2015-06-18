@@ -30,3 +30,7 @@ Router.route('canvas/:id', {
     this.render();
     }
 });
+
+Router.route('presentation', function() {
+  this.render('Presentation');
+});

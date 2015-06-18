@@ -1,0 +1,14 @@
+<template name="Presentation">
+  <div class="reveal">
+    <div class="slides">
+        {{#each blocks}}
+          <section>{{> Slide}}</section>
+        {{/each}}
+    </div>
+  </div>
+</template>
+
+
+<template name="Slide">
+  <canvas id="{{block_id}}" class="slide" width="1280" height="720"></canvas>
+</template>

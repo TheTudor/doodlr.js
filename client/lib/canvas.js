@@ -543,7 +543,7 @@ this.Editor = function Editor(id) {
     editor = new Editor(Session.get('currentId'));
     // receiver = new Receiver(Session.get('currentId'));
     // editor.canvasInit(canvas);
-    loadImage(editor.getCtx());
+    loadImage2(editor.getCtx());
  
     // init the color picker
     $("#colorpicker").spectrum({
@@ -916,7 +916,7 @@ this.Editor = function Editor(id) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Load Image from Parse
-loadImage = function(ctx) {
+loadImage2 = function(ctx) {
   var url = window.location.href;
   var rowIndex = url.indexOf("x") + 1;
   var colIndex = url.indexOf("y") + 1;

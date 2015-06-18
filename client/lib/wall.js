@@ -46,7 +46,7 @@
   });
 
   // TODO: include canvas.js here to remove duplicate function? 
-  function loadImage(id, ctx, w, h) {
+  loadImage = function (id, ctx, w, h) {
     var rowIndex = id.indexOf("x") + 1;
     var colIndex = id.indexOf("y") + 1;
 

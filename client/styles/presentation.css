@@ -1,0 +1,13 @@
+@import "packages/reveal-js/reveal.js/css/theme/default.css";
+
+.slide {
+  background: #fff;
+}
+
+.reveal {
+  margin-top: 60px;
+}
+
+.slides section {
+  top: -500px;
+}
