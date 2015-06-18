@@ -9,8 +9,8 @@
     <div id = "select">  </div>
     <div id = "pencil">  </div>
     <div id = "brush">   </div>
-    <div id = "spray">   </div>
-    <div id = "shape">   </div>
+    <div id = "line">   </div>
+    <div id = "rectangle">   </div>
     <div id = "eyedrop"> </div>
     <!-- colorpicker 
          meteor add ryanswapp:spectrum-colorpicker -->
@@ -19,6 +19,8 @@
 
   {{> PencilProperties }}
   {{> BrushProperties }}
+  {{> LineProperties }}
+  {{> RectProperties }}
 
   <button class="save-button">Save</button>
 </template>
@@ -32,7 +34,7 @@
       {{/each}}
     </div>
     <div class="width">
-      <h3>WIDTH</h3>
+      <h4>WIDTH</h4>
       <input id="pencil-width" type="range" value="2" min="1" max="4">
       <input id="pencil-width-field" type="text" value="2">
     </div>
@@ -51,19 +53,39 @@
       {{/each}}
     </div>
     <div class="width">
-      <h3>WIDTH</h3>
-      <input id="brush-width" type="range" value="10" min="1" max="200">
-      <input id="brush-width-field" type="text" value="10">
+      <h4>WIDTH</h4>
+      <input id="brush-width" type="range" value="10i0" min="1" max="200">
+      <input id="brush-width-field" type="text" value="100">
     </div>
     <div class="opacity">
-      <h3>OPACITY</h3>
+      <h4>OPACITY</h4>
       <input id="brush-opacity" type="range" value="50" min="0" max="100">
       <input id="brush-opacity-field" type="text" value="0.5">
     </div>
   </div>
 </template>
-
 <template name="BrushTextureDiv">
   <div><img id="{{id}}" class="brushTexture" src={{image}} height=50 width=50></div>
 </template>
 
+<template name="LineProperties">
+  <!-- div's for each tool's properties -->
+  <div id = "line-prop" class="prop">
+    <div class="width">
+      <h4>WIDTH</h4>
+      <input id="line-width" type="range" value="10" min="1" max="500">
+      <input id="line-width-field" type="text" value="10">
+    </div>
+  </div>
+</template>
+
+<template name="RectProperties">
+  <!-- div's for each tool's properties -->
+  <div id = "rect-prop" class="prop">
+    <div class="width">
+      <h4>WIDTH</h4>
+      <input id="rect-width" type="range" value="10" min="1" max="500">
+      <input id="rect-width-field" type="text" value="10">
+    </div>
+  </div>
+</template>

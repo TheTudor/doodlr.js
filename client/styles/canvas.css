@@ -4,23 +4,15 @@
   width: 720px;
 }
 
-#select, #pencil, #brush, #spray, #shape, #eyedrop {
+#select, #pencil, #brush, #line, #rectangle, #eyedrop {
   display: inline-block;
   height: 49px;
   margin-left: 2px;
   width: 49px;
 }
-/*.full-spectrum {
-  border: 0;
-  display: inline-block; 
-  height: 40px;
-  margin-left: 2px;
-  margin-top: -35px;
-  width: 40px;
-}*/
 #select {  
   background-image: url('http://i.imgur.com/AuWgd6R.png');
-  background-position: 0px 0px; 
+  background-position: 0px 0px;  
   background-repeat: no-repeat;
 } 
 #pencil { 
@@ -33,14 +25,14 @@
   background-position: 0px -102px;  
   background-repeat: no-repeat;
 } 
-#spray { 
-  background-image: url('http://i.imgur.com/AuWgd6R.png');
-  background-position: 0px -153px;  
+#line { 
+  background-color: white;
+  background-image: url('/lineTool.png');
   background-repeat: no-repeat;
 } 
-#shape { 
-  background-image: url('http://i.imgur.com/AuWgd6R.png');
-  background-position: 0px -204px;  
+#rectangle { 
+  background-color: white;
+  background-image: url('/rectangleTool.png');
   background-repeat: no-repeat;
 } 
 #eyedrop {
@@ -50,13 +42,17 @@
 }
 
 
+
 /* tool properties */
 .prop {
+  background-color: #666;
   border: 1px solid #888;
-  /*display: none;*/
+  display: none;
   margin: 5px;
   padding: 5px;
+  position: absolute;
   width: 262px;
+  z-index: 1000;
 }
 .texture, .width, .opacity {
   display: block;
@@ -89,4 +85,10 @@
   -webkit-box-sizing:border-box;
   position: absolute; 
   z-index: 1000;
+}
+
+
+/* HIDE PENCIL TEXTURE OPTION CUZ NO WORK AND NOT RELEVANT */
+#pencil-prop > .texture {
+  display: none;
 }
