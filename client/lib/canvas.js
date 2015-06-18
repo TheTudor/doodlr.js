@@ -117,15 +117,17 @@ this.Editor = function Editor(id) {
   // tools and their parameters
   var tool = "pencil";    // default tool
 
-  var pencilTexture = null; 
-  var pencilSize    = 2;
-  var brushTexture  = null;
-  var brushSize     = 100; 
-  var brushOpacity  = 0.5;
-  var sprayTexture  = null; 
-  var sprayStencil  = null;
-  var spraySize     = 100;
-  var sprayOpacity  = 0.5;
+  var pencilTexture    = null;
+  var pencilTextureUrl = '/brush0.png'; 
+  var pencilSize       = 2;
+  var brushTexture     = null;
+  var brushTextureUrl  = '/brush0.png';
+  var brushSize        = 100; 
+  var brushOpacity     = 0.5;
+  var sprayTexture     = null; 
+  var sprayStencil     = null;
+  var spraySize        = 100;
+  var sprayOpacity     = 0.5;
   
   var color = "#000000";
 
@@ -167,22 +169,24 @@ this.Editor = function Editor(id) {
     return tool;
   };
 
-  setPencilTexture = function(textureUrl) {
-    if(textureUrl != null) {
-      pencilTexture = new Image();
-      pencilTexture.src = textureUrl;
-      pencilTexture.setAttribute('crossOrigin', 'anonymous');
-    }
-    else pencilTexture = null;
+  setPencilTexture = function(url) {
+    textureUrl = url;
+    //if(textureUrl != null) {
+    //  pencilTexture = new Image();
+    //  pencilTexture.src = textureUrl;
+    //  pencilTexture.setAttribute('crossOrigin', 'anonymous');
+    //}
+    //else pencilTexture = null;
     console.log("pencil texture updated" + textureUrl);
   };
   setPencilSize = function(pencilSize) {
     pencilSize = pencilSize;
   };
-  setBrushTexture = function(textureUrl) {
-    brushTexture = new Image();
-    brushTexture.src = textureUrl;
-    brushTexture.setAttribute('crossOrigin', 'anonymous');
+  setBrushTexture = function(url) {
+    textureUrl = url;
+    //brushTexture = new Image();
+    //brushTexture.src = textureUrl;
+    //brushTexture.setAttribute('crossOrigin', 'anonymous');
   };
   setBrushSize = function(brushSize) {
     brushSize = brushSize;
@@ -278,40 +282,61 @@ this.Editor = function Editor(id) {
 
   //
   // pencil
-  drawDot = function(toX, toY) {
-    console.log("drawing dot");
+  drawDot = function() {
     if(pencilTexture == null) {
-      drawDefaultPencilDot(toX, toY, pencilSize, color);
+    // >>>>
+      drawStream.emit(Session.get('currentId') + ':down-dot', 
+                                    curr, pencilSize, color);
+
+      drawDefaultPencilDot(curr, pencilSize, color);
     }
     else {
-      drawTextureDot(pencilSize, pencilTexture, 1, color); 
+      var opac = 1;
+    // >>>>
+      drawStream.emit(Session.get('currentId') + ':down-texture', 
+                                    curr, pencilSize, pencilTextureUrl, opac, color);
+
+      drawTextureDot(curr, pencilSize, pencilTexture, opac, color); 
     }
   };
-  drawLine = function(from, to) {
+  drawLine = function() {
     if(pencilTexture == null) {
-      drawDefaultPencilLine(from, to, pencilSize, color);
+    // >>>>
+      drawStream.emit(Session.get('currentId') + ':move-line', 
+                                    prev, curr, pencilSize, color);
+      drawDefaultPencilLine(prev, curr, pencilSize, color);
     }
     else {
-      drawTextureLine(pencilSize, pencilTexture, 0.5, color); 
+      var opac = 0.5;
+    // >>>>
+      drawStream.emit(Session.get('currentId') + ':move-texture', 
+                                    prev, curr, pencilSize, 
+                                    pencilTextureUrl, opac, color);
+      drawTextureLine(prev, curr, pencilSize, pencilTextureUrl, opac, color); 
     }
   };
 
   //
   // brush
   drawSingleStroke = function() {
-    drawTextureDot(brushSize, brushTexture, brushOpacity,  color); 
+    // >>>>
+    drawStream.emit(Session.get('currentId') + ':down-texture', curr, brushSize, brushTextureUrl, brushOpacity,  color);
+
+    drawTextureDot(curr, brushSize, brushTextureUrl, brushOpacity,  color); 
   };
   drawStroke = function() {
-    drawTextureLine(brushSize, brushTexture, brushOpacity, color); // TODO: smoothing opacity when stroking 
+    // >>>>
+    drawStream.emit(Session.get('currentId') + ':move-texture', prev, curr, brushSize, brushTextureUrl, brushOpacity, color); 
+
+    drawTextureLine(prev, curr, brushSize, brushTextureUrl, brushOpacity, color); // TODO: smoothing opacity when stroking
   };
 
+
   // DRAWING HELPERS + NON-DEXTURE DRAWING
-  drawDefaultPencilDot = function(hereX, hereY, size, color) {
-    console.log("hello from drawer");
-    console.log("drawing at " + hereX + ' ' + hereY);
+  drawDefaultPencilDot = function(at, size, color) {
     ctx.beginPath();
     ctx.fillStyle = color;
-    ctx.fillRect(hereX, hereY, size, size);
+    ctx.fillRect(at.x, at.y, size, size);
     ctx.closePath();
   };
   drawDefaultPencilLine = function(from, to, size, color) {
@@ -326,35 +351,43 @@ this.Editor = function Editor(id) {
     ctx.closePath();
   };
   // drawing helper
-  drawTextureDot = function(size, texture, opacity, color) {
+  drawTextureDot = function(at, size, textureUrl, opacity, color) {
     // update the brush with user parameters
-    var brush = setTexture(size, texture, opacity, color);
- 
+    var brush = setTexture(size, textureUrl, opacity, color);
+    
     ctx.save();
     ctx.globalAlpha = opacity;
-    ctx.drawImage(brush, curr.x - brush.width/2, curr.y - brush.height/2);
+    ctx.drawImage(brush, at.x - brush.width/2, at.y - brush.height/2);
     ctx.restore();
   };
-  drawTextureLine = function(size, texture, opacity, color) {
+  drawTextureLine = function(from, to, size, textureUrl, opacity, color) {
     // update the brush with user parameters
-    var brush = setTexture(size, texture, opacity, color);
+    
+    var brush = setTexture(size, textureUrl, opacity, color);
 
-    var dist  = Dist.distance(prev, curr);
-    var alpha = Dist.angle(prev, curr);
+    var dist  = Dist.distance(from, to);
+    var alpha = Dist.angle(from, to);
     var x, y;
 
     var frame = size > 5 ? Math.ceil(size/4) : 0.5;
     for(var i = 0; (i <= dist || i == 0); i+=frame) {
-      x = prev.x + (Math.sin(alpha) * i) - brush.width/2;
-      y = prev.y + (Math.cos(alpha) * i) - brush.height/2;
+      x = from.x + (Math.sin(alpha) * i) - brush.width/2;
+      y = from.y + (Math.cos(alpha) * i) - brush.height/2;
       ctx.save();
       ctx.globalAlpha = opacity;
       ctx.drawImage(brush, x, y);
       ctx.restore();
     }
   };
-  setTexture = function(size, texture, opacity, color) {
-    texture.setAttribute('crossOrigin', 'anonymous'); // for safety
+
+  setTexture = function(size, textureUrl, opacity, color) {
+    //texture.setAttribute('crossOrigin', 'anonymous');
+    console.log(textureUrl); // for safety
+    var texture = new Image();
+    texture.src = textureUrl;
+    texture.setAttribute('crossOrigin', 'anonymous');
+    console.log(texture);
+
     var h = texture.height, w = texture.width;
     var scale = size / Math.max(w, h); 
     // create a ghost canvas which is not added to the page, for manipulating the image
@@ -376,34 +409,7 @@ this.Editor = function Editor(id) {
     bctx.putImageData(imgdata, 0, 0);
     return bcanvas;  
   };
-  // There but for the grace of god go I.
-  // http://stackoverflow.com/questions/3448347/how-to-scale-an-imagedata-in-html-canvas
-  // scaleImageData : function(c, imageData, scale) {
-  //   var scaled = c.createImageData(imageData.width * scale, imageData.height * scale);
-  // 
-  //   for(var row = 0; row < imageData.height; row++) {
-  //     for(var col = 0; col < imageData.width; col++) {
-  //       var sourcePixel = [
-  //         imageData.data[(row * imageData.width + col) * 4 + 0],
-  //         imageData.data[(row * imageData.width + col) * 4 + 1],
-  //         imageData.data[(row * imageData.width + col) * 4 + 2],
-  //         imageData.data[(row * imageData.width + col) * 4 + 3]
-  //       ];
-  //       for(var y = 0; y < scale; y++) {
-  //         var destRow = row * scale + y;
-  //         for(var x = 0; x < scale; x++) {
-  //           var destCol = col * scale + x;
-  //           for(var i = 0; i < 4; i++) {
-  //             scaled.data[(destRow * scaled.width + destCol) * 4 + i] =
-  //               sourcePixel[i];
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // 
-  //   return scaled;
-  // }
+
 
   //////////////////
   ////EXPOSE API//// (everyFunction) = everyFunction
@@ -696,11 +702,7 @@ this.Editor = function Editor(id) {
     console.log(editor.getFlag()); console.log(editor.getTool());
     if(editor.getFlag()) {
       if(editor.getTool() == "pencil") {
-        console.log("MUIE");('currendId');
-        editor.drawDot(editor.curr.x, editor.curr.y);
-        // COMMAND EMIT
-        console.log("at session " + Session.get('currentId'));
-        drawStream.emit(Session.get('currentId') + ':down-dot', editor.curr);
+        editor.drawDot();
       }
       if(editor.getTool() == "brush") {
         editor.drawSingleStroke();
@@ -725,10 +727,7 @@ this.Editor = function Editor(id) {
     }
     if(editor.getFlag()) {   // keep drawing on mouse move as long as mouse is down
       if(editor.getTool() == "pencil") {
-        editor.drawLine(editor.prev, editor.curr);
-        // COMMAND EMIT
-        drawStream.emit(Session.get('currentId') + ':move-line', 
-                          editor.prev, editor.curr);
+        editor.drawLine();
       }
       if(editor.getTool() == "brush") {
         editor.drawStroke();
