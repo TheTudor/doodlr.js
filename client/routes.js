@@ -30,3 +30,25 @@ Router.route('canvas/:id', {
     this.render();
     }
 });
+
+Router.route('presentation/:id', {
+  path: '/presentation/:id',
+  template: 'Canvas',
+  // waitOn: function() {
+  //   return [IRLibLoader.load('/client/lib/editor.js'), 
+  //           IRLibLoader.load('/client/lib/color.js')]
+  // },
+  data: function () {
+    return {
+      presentation_mode: true
+    }
+  },
+
+  onAfterAction: function() {
+  },
+  action: function() {
+    console.log("ROUTER" + this.params.id);
+    Session.set("currentId", this.params.id);
+    this.render();
+    }
+});

@@ -4,6 +4,10 @@
   <div id="canvas-wrapper">
   <canvas id="canvas" class="canvas" width="1280" height="720"></canvas>
   </div>
+  
+  {{#if presentation_mode}}
+  <button class="next-slide">Next Slide</button>
+  {{else}}
   <!-- save button - saves current canvas contents to database -->
   <div id = "tools">
     <div id = "select">  </div>
@@ -16,13 +20,15 @@
          meteor add ryanswapp:spectrum-colorpicker -->
     <input type="text" id="colorpicker">
   </div>
-
   {{> PencilProperties }}
   {{> BrushProperties }}
   {{> LineProperties }}
   {{> RectProperties }}
 
   <button class="save-button">Save</button>
+  {{/if}}
+
+  
 </template>
 
 <template name="PencilProperties">

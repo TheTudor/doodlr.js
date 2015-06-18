@@ -634,6 +634,13 @@ this.Editor = function Editor(id) {
     // Event to save canvas content
     'click .save-button': function(e) {
       saveImage(e, row, col);
+    },
+
+    'click .next-slide': function(e) {
+      id = Session.get("currentId");
+      var next_id = id.slice(0, -1) + ( parseInt(id[id.length - 1]) + 1);
+      console.log(next_id)
+      window.location.href = '/presentation/' + next_id;
     }
    });
 
