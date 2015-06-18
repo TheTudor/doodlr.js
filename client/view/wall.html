@@ -1,25 +1,5 @@
 <!-- meteor canvas for full meta-wall view and login/register --> 
 <template name ="Wall">
-  <div class="header">
-    <div class="name">
-    <a href="/"><h1>Doodlr.js</h1></a> 
-    <!-- register and login are links to pop-up forms, using magnific popup
-         meteor add gabrielengel:konecty-magnific-popup
-      -->
-    </div>
-    <div class="user">
-    {{> logInPopup }} &nbsp; | &nbsp; 
-    {{> registerPopup }}
-    </div>
-  </div>
-
-  <!-- hidden divs to be loaded in popups -->
-  <div id="reg-popup" class="mfp-hide">
-    {{> registerForm }}
-  </div>
-  <div id="log-popup" class="mfp-hide">
-    {{> logInForm }}
-  </div>
 
   <!-- main wall view with all the bricks -->
   <div class="wall">
