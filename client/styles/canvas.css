@@ -1,0 +1,99 @@
+/* canvas */
+#canvas {
+  cursor: crosshair;
+}
+
+/* toolbox */
+#tools {
+  height: 49px;
+  width: 720px;
+}
+
+#select, #pencil, #brush, #line, #rectangle, #eyedrop {
+  display: inline-block;
+  height: 49px;
+  margin-left: 2px;
+  width: 49px;
+}
+#select {  
+  background-image: url('http://i.imgur.com/AuWgd6R.png');
+  background-position: 0px 0px;  
+  background-repeat: no-repeat;
+} 
+#pencil { 
+  background-image: url('http://i.imgur.com/AuWgd6R.png');
+  background-position: 0px -51px;  
+  background-repeat: no-repeat;
+} 
+#brush { 
+  background-image: url('http://i.imgur.com/AuWgd6R.png');
+  background-position: 0px -102px;  
+  background-repeat: no-repeat;
+} 
+#line { 
+  background-color: white;
+  background-image: url('/lineTool.png');
+  background-repeat: no-repeat;
+} 
+#rectangle { 
+  background-color: white;
+  background-image: url('/rectangleTool.png');
+  background-repeat: no-repeat;
+} 
+#eyedrop {
+  background-image: url('http://i.imgur.com/AuWgd6R.png');
+  background-position: 0px -255px;  
+  background-repeat: no-repeat;
+}
+
+
+
+/* tool properties */
+.prop {
+  background-color: #666;
+  border: 1px solid #888;
+  display: none;
+  margin: 5px;
+  padding: 5px;
+  position: absolute;
+  width: 262px;
+  z-index: 1000;
+}
+.texture, .width, .opacity {
+  display: block;
+}
+.texture > div {
+  background-color: #ffffff;
+  background-size: 50px 50px;
+  display: inline-block;
+  height: 50px;
+  width: 50px;
+}
+.texture > div > img {
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+.width > input[type="text"], .opacity > input[type="text"] {
+  margin-top: -10px;
+  width: 50px !important;
+}
+.width > input[type="range"], .opacity > input[type="range"] {
+  margin-top: -10px;
+  width: 196px !important;
+}
+
+/* selection area in canvas */
+.selectarea {
+  border: 1px dashed #666;
+  box-sizing:border-box;
+  -moz-box-sizing:border-box;
+  -webkit-box-sizing:border-box;
+  position: absolute; 
+  z-index: 1000;
+}
+
+
+/* HIDE PENCIL TEXTURE OPTION CUZ NO WORK AND NOT RELEVANT */
+#pencil-prop > .texture {
+  display: none;
+}

@@ -1,0 +1,179 @@
+@import url(http://fonts.googleapis.com/css?family=Lato:100);
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,900);
+
+/* ------------------------------------------------------------------------------- */
+/* Body and general styling ------------------------------------------------------ */
+/* ------------------------------------------------------------------------------- */
+* {
+  padding: 0;
+  margin: 0;
+  outline: none;
+}
+
+/* Body typography */
+body, p {
+  color: #fff;
+  font-family: 'Source Sans Pro';
+  font-size: 14px;
+  font-weight: 400;
+}
+h1, h2, h3 {
+  font-family: 'Lato'; 
+} 
+h4, h5, h6 {
+  font-family: 'Source Sans Pro';
+  font-weight: 900;
+} 
+h1 {
+  font-size: 30px;
+}
+
+/* Links */
+a, a:link, a:visited, a:active {
+  color: #e5e000;
+  text-decoration: none;
+  transition:         color .25s ease-in-out;
+  -moz-transition:    color .25s ease-in-out;
+  -webkit-transition: color .25s ease-in-out;}
+a, a:hover {
+   color: #fff;
+}
+
+/* ------------------------------------------------------------------------------- */
+/* Input and form elements ------------------------------------------------------- */
+/* ------------------------------------------------------------------------------- */
+form {
+  background-color: #222;
+  padding: 20px;
+}
+input[type="text"], input[type="email"], input[type="password"], input[type="submit"] {
+  border-width: 0.5px;
+  border-radius:         4px;
+  -moz-border-radius:    4px;
+  -webkit-border-radius: 4px;
+  height: 34px;
+  text-indent: 5px;
+  width: 200px;
+}
+input[type="text"], input[type="email"], input[type="password"] {
+  background-color: #ffffdf;
+  color: #444;
+  font-family: monospace;
+  font-size: 16px;
+  margin: 5px;
+}
+input[type="submit"] {
+  border-collapse: separate;
+  border-color: #a5a000;
+  background-color: #e5e000;
+  color: #111;
+  font-family: 'Source Sans Pro';
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 10px;
+  margin: 15px;
+  transition:         background-color .5s ease-in-out;
+  -moz-transition:    background-color .5s ease-in-out;
+  -webkit-transition: background-color .5s ease-in-out;
+} 
+input[type="submit"]:hover {
+  background-color: #fff;
+} 
+label {
+  color: #e5e000;
+  font-family: 'Lato';
+  font-size: 20px;
+  text-transform: uppercase;
+} 
+
+
+/* ------------------------------------------------------------------------------- */
+/* Layout ------------------------------------------------------------------------ */
+/* ------------------------------------------------------------------------------- */
+body {
+  background-color: #111;
+  background-image: url('http://www.shepherdtone.co.uk/wp-content/themes/bizkit-child/img/bg.png');
+}
+
+/* Wall */
+.wall {
+  margin: 0 auto;
+  overflow: auto;
+  padding-top: 55px;
+  white-space: nowrap;
+  width: auto;
+}
+.row:nth-child(even) {
+  margin-left: 128px;
+}
+.row:nth-child(odd) {
+  margin-right: 128px;
+}
+.block {
+  width: 256px;
+  border: 1px solid #000;
+}
+  
+/* Header */
+.header {
+  background-color: #383838;
+  background-image: url('http://www.shepherdtone.co.uk/wp-content/themes/bizkit-child/img/bg.png');
+  color: #e5e000;
+  font-family: 'Source Sans Pro';
+  font-weight: 300;
+  font-size: 16px; 
+  height: 30px;
+  left: 0px;
+  padding: 10px;
+  position: fixed; 
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+  top: 0px;
+  width: 100%;
+}
+.name, .user {
+  width: 42%;
+  display: inline-block;
+}
+.user {
+  padding-top: 10px;
+  padding-right: 20px;
+  text-align: right;
+  float: right;
+}
+
+/* Popups */
+#reg-popup, #log-popup {
+  text-align: center;
+}
+
+/* Animate the popups */
+.fade-popup.mfp-bg {
+  opacity: 0;
+  transition:         all 0.5s ease-out;
+  -moz-transition:    all 0.5s ease-out;
+  -webkit-transition: all 0.5s ease-out;
+} 
+/* overlay animate in */
+.fade-popup.mfp-bg.mfp-ready {
+  opacity: 0.8;
+}
+/* overlay animate out */
+.fade-popup.mfp-bg.mfp-removing {
+  opacity: 0;
+}
+/* content at start */
+.fade-popup.mfp-wrap .mfp-content {
+  opacity: 0;
+  transition:         all 0.5s ease-out;
+  -moz-transition:    all 0.5s ease-out;
+  -webkit-transition: all 0.5s ease-out;
+}
+/* content animate it */
+.fade-popup.mfp-wrap.mfp-ready .mfp-content {
+  opacity: 1;
+}
+/* content animate out */
+.fade-popup.mfp-wrap.mfp-removing .mfp-content {
+  opacity: 0;
+}
+

@@ -1,0 +1,47 @@
+<!-- meteor canvas for full meta-wall view and login/register --> 
+<template name ="Wall">
+
+  <!-- main wall view with all the bricks -->
+  <div class="wall">
+    {{#each rows}}
+      <div class="row">
+      {{#each blocks}}
+        {{> Block}}
+      {{/each}}
+      </div>
+    {{/each}}
+  </div>
+</template>
+
+
+<!-- template for each block -->
+<template name="Block">
+  <canvas id="{{block_id}}" class="block"></canvas>
+</template>
+
+<!-- templates for the register and login form popups -->
+<template name="registerPopup">
+  <a href="#reg-popup" class="reg-popup-link">Register</a>
+</template>
+<template name="logInPopup">
+  <a href="#log-popup" class="log-popup-link">Log in</a>
+</template>
+
+<!-- template for the register form -->
+<template name="registerForm">
+  <form action="" method="GET">
+    <label>Username</label> <br/><input type="text"     name="username"><br/>
+    <label>Email   </label> <br/><input type="email"    name="email"   ><br/>
+    <label>Password</label> <br/><input type="password" name="password"><br/>
+    <input type="submit" value="REGISTER">
+  </form>
+</template>
+  
+<!-- templates for the login form -->
+<template name="logInForm">
+  <form action="" method="GET">
+    <label>Username</label> <br/><input type="text"     name="username"><br/>
+    <label>Password</label> <br/><input type="password" name="password"><br/>
+    <input type="submit" value="LOGIN">
+  </form>
+</template>
