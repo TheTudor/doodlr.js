@@ -1,23 +1,28 @@
-= doodlr.js =
-=== collaborative drawing app built on top of Meteor and Parse ===
-To run:
+doodlr.js 
+==========
 
-$ cd canvas
+(collaborative drawing app built on top of Meteor and Parse)
 
-$ meteor
+1. To run:
 
-* Home at http://localhost:3000
+  $ cd canvas
 
-* Canvas at http://localhost:3000/canvas
+  $ meteor
 
-Dependencies:
+2. About
 
-* iron:router 
+  * Home at http://localhost:3000
 
-* streams
+  * Canvas at http://localhost:3000/canvas
 
-* gabrielengel:konecty-magnific-popup
+3. Dependencies:
 
-* timmyg13:parse-sdk
+  * iron:router 
 
-* ryanswapp:spectrum-colorpicker
+  * streams
+
+  * gabrielengel:konecty-magnific-popup
+
+  * timmyg13:parse-sdk
+
+  * ryanswapp:spectrum-colorpicker
